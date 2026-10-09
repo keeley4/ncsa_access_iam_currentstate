@@ -29,98 +29,140 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
   font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:860px;margin:0 auto;padding:0 16px}
+.wrap{max-width:880px;margin:0 auto;padding:0 16px}
 a{color:var(--accent)}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
 .skip{position:absolute;left:-9999px}
 .skip:focus{left:8px;top:8px;z-index:99;background:var(--panel);padding:8px 14px;
   border:2px solid var(--accent);border-radius:8px}
-code{font-family:var(--mono);font-size:.9em}
+figure{margin:0}
+figcaption{font-size:.83rem;color:var(--ink3);margin-top:8px}
+svg{max-width:100%;height:auto;display:block}
 
 header{border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20}
-.bar{max-width:860px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:center;gap:12px}
+.bar{max-width:880px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:center;gap:12px}
 .brand{font-weight:650;font-size:.98rem}
 .brand span{color:var(--ink3);font-weight:400}
 .theme{margin-left:auto;background:none;border:1px solid var(--line2);color:var(--ink2);
   border-radius:999px;padding:5px 13px;font:inherit;font-size:.8rem;cursor:pointer}
-nav{max-width:860px;margin:0 auto;padding:6px 16px 0;display:flex;gap:2px;overflow-x:auto}
+nav{max-width:880px;margin:0 auto;padding:6px 16px 0;display:flex;gap:2px;overflow-x:auto}
 nav button{background:none;border:0;border-bottom:2.5px solid transparent;color:var(--ink3);
   font:inherit;font-size:.9rem;padding:8px 11px 9px;cursor:pointer;white-space:nowrap}
 nav button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent);font-weight:620}
 
-main{padding:26px 0 70px}
+main{padding:24px 0 70px}
 [role=tabpanel][hidden]{display:none}
-h1{font-size:1.55rem;line-height:1.2;margin:0 0 6px;letter-spacing:-.02em}
-h2{font-size:1.05rem;margin:30px 0 10px;letter-spacing:-.01em}
-.sub{color:var(--ink2);margin:0 0 22px;font-size:1rem}
+h1{font-size:1.5rem;line-height:1.2;margin:0 0 6px;letter-spacing:-.02em}
+h2{font-size:1.02rem;margin:28px 0 10px;letter-spacing:-.01em}
+.sub{color:var(--ink2);margin:0 0 20px}
 p{margin:0 0 10px}
-.small{font-size:.86rem;color:var(--ink3)}
+.small{font-size:.85rem;color:var(--ink3)}
 
-.badge{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.04em;
+.badge{display:inline-block;font-size:.67rem;font-weight:700;letter-spacing:.04em;
   text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid currentColor}
 .b-auto{color:var(--auto);background:var(--auto-bg)}
 .b-manual{color:var(--manual);background:var(--manual-bg)}
 .b-none{color:var(--none);background:var(--none-bg)}
 
-/* disclosure rows */
+/* ---- simulator ---- */
+.sim{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.sim .ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.sim button.go{background:var(--accent);color:#fff;border:1px solid var(--accent);
+  border-radius:999px;padding:7px 17px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
+.sim button.go[disabled]{opacity:.55;cursor:default}
+.status{font-size:.92rem;color:var(--ink);min-height:1.5em;font-weight:560}
+.status b{color:var(--accent)}
+.token{transition:cx .7s cubic-bezier(.4,0,.2,1),cy .7s cubic-bezier(.4,0,.2,1)}
+@media (prefers-reduced-motion:reduce){.token{transition:none}*{animation:none!important}}
+
+/* ---- matrix ---- */
+.mx{width:100%;border-collapse:separate;border-spacing:3px;font-size:.8rem}
+.mx th{font-weight:620;color:var(--ink3);font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.03em;padding:0 2px 4px;text-align:center;vertical-align:bottom}
+.mx th.rowh{text-align:left;width:150px;text-transform:none;font-size:.82rem;color:var(--ink);
+  letter-spacing:0;padding-right:8px}
+.mx td{padding:0}
+.cell{width:100%;border:1px solid var(--line);border-radius:7px;padding:9px 2px;font:inherit;
+  font-size:.74rem;font-weight:700;cursor:pointer;color:var(--ink3);background:var(--panel2)}
+.cell.auto{background:var(--auto-bg);color:var(--auto);border-color:currentColor}
+.cell.manual{background:var(--manual-bg);color:var(--manual);border-color:currentColor}
+.cell.none{background:var(--none-bg);color:var(--none);border-color:currentColor}
+.cell[aria-pressed=true]{outline:3px solid var(--accent);outline-offset:1px}
+.cell.empty{opacity:.4}
+#mxout{margin-top:14px}
+
+/* ---- path rail ---- */
+.rail{list-style:none;margin:0;padding:0}
+.rail li{position:relative;padding:0 0 0 30px}
+.rail li::before{content:"";position:absolute;left:8px;top:22px;bottom:-4px;width:2px;
+  background:var(--line2)}
+.rail li:last-child::before{display:none}
+.rail .dot{position:absolute;left:2px;top:14px;width:15px;height:15px;border-radius:50%;
+  border:3px solid var(--panel);box-shadow:0 0 0 2px currentColor}
+.dot.auto{background:var(--auto);color:var(--auto)}
+.dot.manual{background:var(--manual);color:var(--manual)}
+.dot.none{background:var(--none);color:var(--none)}
+.rail button{width:100%;text-align:left;background:none;border:0;font:inherit;cursor:pointer;
+  color:var(--ink);padding:10px 0;display:grid;grid-template-columns:1fr auto;gap:10px;
+  align-items:center}
+.rail button:hover .ttl{color:var(--accent)}
+.rail .ttl{font-weight:600;font-size:.93rem}
+.rail .one{display:block;color:var(--ink3);font-size:.8rem;font-family:var(--mono);margin-top:2px}
+.rail .panel{padding:0 0 12px;font-size:.88rem;color:var(--ink2);max-width:60ch}
+.rail .chev{color:var(--ink3);font-size:.75rem}
+.rail button[aria-expanded=true] .chev{transform:rotate(90deg)}
+
+.meter{display:flex;height:10px;border-radius:999px;overflow:hidden;border:1px solid var(--line);
+  margin:0 0 6px}
+.meter i{display:block}
+.meter i.auto{background:var(--auto)} .meter i.manual{background:var(--manual)}
+.meter i.none{background:var(--none)}
+.meterlab{font-size:.8rem;color:var(--ink2);margin:0 0 16px}
+
+/* ---- generic rows ---- */
 .rows{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--panel)}
 .row+.row{border-top:1px solid var(--line)}
 .row>button{width:100%;text-align:left;background:none;border:0;font:inherit;cursor:pointer;
-  padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
-  color:var(--ink)}
+  padding:11px 14px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;color:var(--ink)}
 .row>button:hover{background:var(--panel2)}
-.row .ttl{font-weight:600;font-size:.94rem}
-.row .one{color:var(--ink2);font-size:.88rem;display:block;margin-top:2px}
-.row .chev{color:var(--ink3);font-size:.8rem;transition:transform .15s}
+.row .ttl{font-weight:600;font-size:.92rem}
+.row .one{color:var(--ink2);font-size:.86rem;display:block;margin-top:2px}
+.row .chev{color:var(--ink3);font-size:.78rem}
 .row>button[aria-expanded=true] .chev{transform:rotate(90deg)}
-.panel{padding:0 14px 14px 14px;font-size:.89rem;color:var(--ink2);border-top:1px dashed var(--line)}
-.panel p{margin:10px 0 0}
-.panel .meta{font-family:var(--mono);font-size:.74rem;color:var(--ink3);margin-top:9px}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.panel{padding:0 14px 13px;font-size:.88rem;color:var(--ink2);border-top:1px dashed var(--line)}
+.panel p{margin:9px 0 0;max-width:62ch}
+.panel .meta{font-family:var(--mono);font-size:.73rem;color:var(--ink3);margin-top:8px}
 
-/* question cards */
-.qs{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:0 0 8px}
+.qs{display:grid;gap:9px;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));margin:0 0 6px}
 .q{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
-  border-radius:var(--r);padding:13px 15px;font:inherit;text-align:left;cursor:pointer;color:var(--ink)}
+  border-radius:var(--r);padding:12px 14px;font:inherit;text-align:left;cursor:pointer;color:var(--ink)}
 .q:hover{background:var(--panel2)}
-.q b{display:block;font-size:.93rem;margin-bottom:3px}
-.q span{font-size:.85rem;color:var(--ink2)}
+.q b{display:block;font-size:.9rem;margin-bottom:2px}
+.q span{font-size:.82rem;color:var(--ink2)}
 
-/* stage rail */
-.rail{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:6px 0 4px}
-@media (max-width:700px){.rail{grid-template-columns:1fr 1fr}}
-@media (max-width:420px){.rail{grid-template-columns:1fr}}
-.rail div{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:10px 11px}
-.rail b{display:block;font-size:.85rem}
-.rail span{font-size:.78rem;color:var(--ink2)}
-.rail em{display:block;font-family:var(--mono);font-size:.7rem;color:var(--ink3);
-  font-style:normal;margin-top:5px}
-
-/* controls */
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
 .chips button{background:var(--panel);border:1px solid var(--line2);color:var(--ink2);
   border-radius:999px;padding:5px 13px;font:inherit;font-size:.85rem;cursor:pointer}
-.chips button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);
-  color:#fff;font-weight:600}
+.chips button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 input[type=search]{width:100%;padding:9px 13px;font:inherit;font-size:.92rem;
-  border:1px solid var(--line2);border-radius:999px;background:var(--panel);color:var(--ink);
-  margin:0 0 12px}
-.facts{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+  border:1px solid var(--line2);border-radius:999px;background:var(--panel);color:var(--ink);margin:0 0 12px}
+.facts{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
 .facts span{background:var(--panel2);border:1px solid var(--line);border-radius:999px;
-  padding:4px 11px;font-size:.8rem;color:var(--ink2)}
+  padding:4px 11px;font-size:.79rem;color:var(--ink2)}
 .facts span b{color:var(--ink);font-weight:620}
-.toggle{display:flex;align-items:center;gap:7px;font-size:.86rem;color:var(--ink2);margin:0 0 12px}
-
-table{border-collapse:collapse;width:100%;font-size:.88rem}
-th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3)}
-.tw{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
-  padding:2px 12px 8px}
+table.t{border-collapse:collapse;width:100%;font-size:.87rem}
+.t th,.t td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.t th{font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3)}
+.tw{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:2px 12px 8px}
 .note{background:var(--accent-bg);border:1px solid var(--line);border-left:3px solid var(--accent);
   border-radius:8px;padding:11px 14px;font-size:.88rem;margin:14px 0}
 .note p{margin:0}
-footer{border-top:1px solid var(--line);padding:20px 0 40px;font-size:.84rem;color:var(--ink3)}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--ink2);margin:12px 0 0}
+footer{border-top:1px solid var(--line);padding:20px 0 40px;font-size:.84rem;color:var(--ink3)}
+.warn{fill:var(--none)}
+.warnstroke{stroke:var(--none)}
+.stage-on rect{stroke-width:3;opacity:1}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 </style>
 </head>
 <body>
@@ -132,55 +174,150 @@ footer{border-top:1px solid var(--line);padding:20px 0 40px;font-size:.84rem;col
   </div>
   <nav role="tablist" aria-label="Sections">
     <button role="tab" id="t-start" aria-controls="start" aria-selected="true">Start</button>
+    <button role="tab" id="t-compare" aria-controls="compare" aria-selected="false" tabindex="-1">Compare</button>
     <button role="tab" id="t-systems" aria-controls="systems" aria-selected="false" tabindex="-1">By system</button>
     <button role="tab" id="t-pieces" aria-controls="pieces" aria-selected="false" tabindex="-1">The pieces</button>
     <button role="tab" id="t-logins" aria-controls="logins" aria-selected="false" tabindex="-1">Logins</button>
     <button role="tab" id="t-glossary" aria-controls="glossary" aria-selected="false" tabindex="-1">Glossary</button>
   </nav>
 </header>
-
 <main class="wrap" id="main">
-
 <section id="start" role="tabpanel" aria-labelledby="t-start" tabindex="0">
   <h1>An award is not access.</h1>
-  <p class="sub">About a dozen systems sit between &ldquo;approved&rdquo; and &ldquo;logged in.&rdquo;
-  Here is what each one does.</p>
+  <p class="sub">Press the button. Watch where a request actually stops.</p>
+
+  <div class="sim">
+    <div class="ctl">
+      <button class="go" id="run" type="button">Run a request</button>
+      <span class="status" id="stat">Approved on paper. Nothing has happened on the machine yet.</span>
+    </div>
+    <figure>
+    <svg viewBox="0 0 700 170" role="img" id="pipe"
+      aria-label="A request moves through five stages: approval, the allocations database, provisioning, the directory, and the resource. It waits at provisioning for a scheduled batch job.">
+      <defs>
+        <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0 0 L8 4 L0 8 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <g stroke="currentColor" stroke-width="1.5" opacity=".45" marker-end="url(#ar)">
+        <line x1="110" y1="60" x2="152" y2="60"/>
+        <line x1="242" y1="60" x2="284" y2="60"/>
+        <line x1="374" y1="60" x2="416" y2="60"/>
+        <line x1="506" y1="60" x2="548" y2="60"/>
+      </g>
+      <g font-size="11" fill="currentColor" opacity=".62" text-anchor="middle">
+        <text x="131" y="52">records</text>
+        <text x="263" y="52">polls</text>
+        <text x="395" y="52">writes</text>
+        <text x="527" y="52">reads</text>
+      </g>
+      <g id="stages" font-size="12" text-anchor="middle">
+        <g id="st1"><rect x="20" y="62" width="90" height="42" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"/>
+           <text x="65" y="80" fill="currentColor" font-weight="650">Approval</text>
+           <text x="65" y="95" fill="currentColor" font-size="10.5" opacity=".7">XRAS · AMIE</text></g>
+        <g id="st2"><rect x="152" y="62" width="90" height="42" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"/>
+           <text x="197" y="80" fill="currentColor" font-weight="650">IDDS</text>
+           <text x="197" y="95" fill="currentColor" font-size="10.5" opacity=".7">the record</text></g>
+        <g id="st3"><rect x="284" y="62" width="90" height="42" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"/>
+           <text x="329" y="80" fill="currentColor" font-weight="650">acctd</text>
+           <text x="329" y="95" fill="currentColor" font-size="10.5" opacity=".7">on a timer</text></g>
+        <g id="st4"><rect x="416" y="62" width="90" height="42" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"/>
+           <text x="461" y="80" fill="currentColor" font-weight="650">LDAP</text>
+           <text x="461" y="95" fill="currentColor" font-size="10.5" opacity=".7">your group</text></g>
+        <g id="st5"><rect x="548" y="62" width="90" height="42" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"/>
+           <text x="593" y="80" fill="currentColor" font-weight="650">Delta</text>
+           <text x="593" y="95" fill="currentColor" font-size="10.5" opacity=".7">you log in</text></g>
+      </g>
+      <text id="waitlab" x="329" y="152" font-size="11.5" text-anchor="middle" fill="currentColor" opacity="0">
+        waiting for the next cycle</text>
+      <circle id="tok" class="token" cx="65" cy="128" r="9" fill="none" stroke="currentColor"
+        stroke-width="2" opacity=".35"/>
+    </svg>
+    <figcaption>The only step that takes real time is the third one. Nothing fires when you are
+    approved &mdash; a scheduled job wakes up and asks what is new.</figcaption>
+    </figure>
+  </div>
 
   <h2>Start with your question</h2>
   <div class="qs">
-    <button class="q" data-goto="systems" data-sys="delta-access"><b>Approved &mdash; why can&rsquo;t I log in?</b><span>Provisioning is a timed batch job, not an instant reaction.</span></button>
-    <button class="q" data-goto="logins"><b>Which password does this want?</b><span>NCSA and campus are separate domains, with separate Duo.</span></button>
-    <button class="q" data-goto="pieces"><b>What is IDDS? acctd?</b><span>One line each, expand for more.</span></button>
-    <button class="q" data-goto="systems"><b>How does my system work?</b><span>Step by step, with the manual bits marked.</span></button>
+    <button class="q" data-goto="compare"><b>Which systems are manual?</b><span>One grid, all eight.</span></button>
+    <button class="q" data-goto="logins"><b>Which password does this want?</b><span>NCSA and campus are separate.</span></button>
+    <button class="q" data-goto="pieces"><b>What is IDDS? acctd?</b><span>One line each.</span></button>
+    <button class="q" data-goto="systems"><b>How does my system work?</b><span>Step by step.</span></button>
   </div>
 
-  <h2>Five stages, every time</h2>
-  <div class="rail">
-    <div><b>1 Request</b><span>Someone says yes.</span><em>XRAS · AMIE</em></div>
-    <div><b>2 Record</b><span>The award is written down.</span><em>IDDS</em></div>
-    <div><b>3 Provision</b><span>Objects made on the machine.</span><em>acctd</em></div>
-    <div><b>4 Entitlement</b><span>Permission put somewhere readable.</span><em>LDAP group</em></div>
-    <div><b>5 Enforcement</b><span>The resource checks, at use.</span><em>Slurm · SSH</em></div>
-  </div>
-  <p class="small">Identity runs alongside all five. Being known to a machine grants you nothing.</p>
+  <h2>Two writers, one directory</h2>
+  <div class="fig"><figure>
+  <svg viewBox="0 0 640 210" role="img"
+    aria-label="The allocations database feeds the directory by two separate routes: a sync script writes identity attributes to the main branch, and acctd writes allocation state to per-resource branches, which have no named owner.">
+    <defs>
+      <marker id="ar2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L8 4 L0 8 z" fill="currentColor"/>
+      </marker>
+    </defs>
+    <rect x="16" y="78" width="104" height="48" rx="8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <text x="68" y="100" font-size="13" font-weight="650" text-anchor="middle" fill="currentColor">IDDS</text>
+    <text x="68" y="115" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".7">the record</text>
 
-  <h2>Four things worth knowing</h2>
-  <div class="rows" id="keyfacts"></div>
+    <rect x="212" y="26" width="128" height="42" rx="8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <text x="276" y="52" font-size="12" text-anchor="middle" fill="currentColor">Savannah sync</text>
+    <rect x="212" y="136" width="128" height="42" rx="8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <text x="276" y="162" font-size="12" text-anchor="middle" fill="currentColor">acctd</text>
+
+    <path d="M120 94 C 165 94 170 47 208 47" fill="none" stroke="currentColor" stroke-width="1.6"
+      marker-end="url(#ar2)" opacity=".75"/>
+    <path d="M120 110 C 165 110 170 157 208 157" fill="none" stroke="currentColor" stroke-width="1.6"
+      marker-end="url(#ar2)" opacity=".75"/>
+
+    <rect x="432" y="26" width="190" height="152" rx="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <text x="527" y="18" font-size="12" font-weight="650" text-anchor="middle" fill="currentColor">NCSA LDAP</text>
+    <rect x="446" y="40" width="162" height="44" rx="6" fill="currentColor" opacity=".07"/>
+    <text x="458" y="58" font-size="11.5" fill="currentColor" font-weight="620">main branch</text>
+    <text x="458" y="74" font-size="10.5" fill="currentColor" opacity=".72">who you are</text>
+    <rect x="446" y="98" width="162" height="62" rx="6" fill="currentColor" opacity=".07"/>
+    <text x="458" y="116" font-size="11.5" fill="currentColor" font-weight="620">resource branches</text>
+    <text x="458" y="132" font-size="10.5" fill="currentColor" opacity=".72">what you may use</text>
+    <text x="458" y="148" font-size="10.5" class="warn" font-weight="650">no named owner</text>
+
+    <line x1="340" y1="47" x2="428" y2="55" stroke="currentColor" stroke-width="1.6"
+      marker-end="url(#ar2)" opacity=".75"/>
+    <line x1="340" y1="157" x2="428" y2="128" stroke="currentColor" stroke-width="1.6"
+      marker-end="url(#ar2)" opacity=".75"/>
+    <text x="384" y="40" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".7">email, UID</text>
+    <text x="384" y="152" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".7">groups</text>
+  </svg>
+  <figcaption>Two things write to the same directory and do not coordinate. Keeping them apart
+  explains most of the rest of this site.</figcaption>
+  </figure></div>
 
   <div class="legend">
-    <span><span class="badge b-auto">Auto</span> a machine does it</span>
-    <span><span class="badge b-manual">Manual</span> a person does it</span>
-    <span><span class="badge b-none">None</span> nothing does it</span>
+    <span><span class="badge b-auto">A</span> a machine does it</span>
+    <span><span class="badge b-manual">M</span> a person does it</span>
+    <span><span class="badge b-none">&ndash;</span> nothing does it</span>
   </div>
+</section>
+
+<section id="compare" role="tabpanel" aria-labelledby="t-compare" tabindex="0" hidden>
+  <h1>Where the people are</h1>
+  <p class="sub">Eight systems, the same five stages. Pick any cell.</p>
+  <div class="tw" style="padding:12px"><table class="mx" id="mx"></table></div>
+  <div class="legend" style="margin:12px 0 0">
+    <span><span class="badge b-auto">A</span> automated</span>
+    <span><span class="badge b-manual">M</span> a person acts</span>
+    <span><span class="badge b-none">&ndash;</span> nothing happens</span>
+    <span class="small">blank = no step at this stage</span>
+  </div>
+  <div id="mxout"></div>
 </section>
 
 <section id="systems" role="tabpanel" aria-labelledby="t-systems" tabindex="0" hidden>
   <h1>By system</h1>
-  <p class="sub">Same five stages. Very different amounts of human effort.</p>
+  <p class="sub">The same five stages. Very different amounts of human effort.</p>
   <div class="chips" id="syspick" role="group" aria-label="Choose a system"></div>
+  <div class="meter" id="meter" role="img" aria-label="Proportion of steps that are automated, manual, or absent"></div>
+  <p class="meterlab" id="meterlab"></p>
   <div class="facts" id="sysfacts"></div>
-  <label class="toggle"><input type="checkbox" id="onlyman"> Show only the steps a person does</label>
-  <div class="rows" id="sysflow"></div>
+  <ul class="rail" id="sysflow"></ul>
   <div id="sysnote"></div>
 </section>
 
@@ -194,25 +331,75 @@ footer{border-top:1px solid var(--line);padding:20px 0 40px;font-size:.84rem;col
 
 <section id="logins" role="tabpanel" aria-labelledby="t-logins" tabindex="0" hidden>
   <h1>Logins</h1>
-  <p class="sub">One researcher, five or six credentials. Nothing joins them up.</p>
-  <div class="tw"><table>
+  <p class="sub">One person, several credentials, nothing joining them.</p>
+  <div class="fig"><figure>
+  <svg viewBox="0 0 660 260" role="img"
+    aria-label="One researcher holds separate NCSA, campus NetID and ACCESS credentials. Each opens different systems, and no service links them to each other.">
+    <defs>
+      <marker id="ar3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L8 4 L0 8 z" fill="currentColor"/>
+      </marker>
+    </defs>
+    <circle cx="58" cy="128" r="26" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <text x="58" y="126" font-size="11" text-anchor="middle" fill="currentColor" font-weight="650">one</text>
+    <text x="58" y="139" font-size="11" text-anchor="middle" fill="currentColor" font-weight="650">person</text>
+
+    <g font-size="11.5" text-anchor="middle">
+      <rect x="196" y="28" width="150" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <text x="271" y="46" fill="currentColor" font-weight="620">NCSA identity</text>
+      <text x="271" y="60" fill="currentColor" font-size="10" opacity=".7">Kerberos + NCSA Duo</text>
+
+      <rect x="196" y="108" width="150" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <text x="271" y="126" fill="currentColor" font-weight="620">UIUC NetID</text>
+      <text x="271" y="140" fill="currentColor" font-size="10" opacity=".7">+ Illinois Duo</text>
+
+      <rect x="196" y="188" width="150" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <text x="271" y="206" fill="currentColor" font-weight="620">ACCESS ID</text>
+      <text x="271" y="220" fill="currentColor" font-size="10" opacity=".7">national programme</text>
+    </g>
+
+    <g stroke="currentColor" stroke-width="1.6" opacity=".7" marker-end="url(#ar3)" fill="none">
+      <path d="M82 114 C 140 90 150 48 192 48"/>
+      <path d="M86 128 L 192 128"/>
+      <path d="M82 142 C 140 166 150 208 192 208"/>
+    </g>
+
+    <g font-size="11.5" text-anchor="start">
+      <text x="400" y="52" fill="currentColor">Delta · Radiant · Nightingale · storage</text>
+      <text x="400" y="132" fill="currentColor">Campus Cluster · ICRN</text>
+      <text x="400" y="212" fill="currentColor">The ACCESS portal only</text>
+    </g>
+    <g stroke="currentColor" stroke-width="1.6" opacity=".7" marker-end="url(#ar3)">
+      <line x1="346" y1="48" x2="392" y2="48"/>
+      <line x1="346" y1="128" x2="392" y2="128"/>
+      <line x1="346" y1="208" x2="392" y2="208"/>
+    </g>
+
+    <path d="M271 68 L 271 108 M271 148 L 271 188" class="warnstroke" stroke-width="2"
+      stroke-dasharray="5 5" fill="none"/>
+    <text x="283" y="92" font-size="10.5" class="warn" font-weight="650">no link</text>
+    <text x="283" y="172" font-size="10.5" class="warn" font-weight="650">no link</text>
+  </svg>
+  <figcaption>No service can say these are the same human. Where it matters, somebody matches
+  them by hand on name and email.</figcaption>
+  </figure></div>
+
+  <h2>Which credential opens what</h2>
+  <div class="tw"><table class="t">
     <thead><tr><th>Credential</th><th>Second factor</th><th>Opens</th></tr></thead>
     <tbody id="credt"></tbody>
   </table></div>
-  <div class="note"><p><strong>Most common mix-up.</strong> Delta wants your NCSA password and
-  NCSA Duo. The Campus Cluster wants your NetID password and Illinois Duo. Different domains,
-  different Duo enrolments.</p></div>
+  <div class="note"><p><strong>The usual mix-up.</strong> Delta wants your NCSA password and NCSA
+  Duo. The Campus Cluster wants your NetID password and Illinois Duo.</p></div>
   <div class="rows" id="idrows"></div>
 </section>
 
 <section id="glossary" role="tabpanel" aria-labelledby="t-glossary" tabindex="0" hidden>
   <h1>Glossary</h1>
   <input type="search" id="gsearch" placeholder="Search terms…" aria-label="Search glossary">
-  <div class="tw"><table><tbody id="glist"></tbody></table></div>
+  <div class="tw"><table class="t"><tbody id="glist"></tbody></table></div>
 </section>
-
 </main>
-
 <footer><div class="wrap">
   <p>Current state as of October 2026, from the NCSA IAM discovery record. Some of it is
   documented but unconfirmed. Corrections welcome &mdash;
@@ -428,48 +615,46 @@ const GLOSS=[
  ["XRAS","The allocation request and review application."]
 ];
 
+
 /* ---------- helpers ---------- */
 const E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const MODE={auto:"Auto",manual:"Manual",none:"None"};
+const LET={auto:"A",manual:"M",none:"–"};
 let uid=0;
 function rows(items){
-  return items.map(it=>{
-    const id="d"+(++uid);
+  return items.map(it=>{const id="d"+(++uid);
     return '<div class="row"><button type="button" aria-expanded="false" aria-controls="'+id+'">'+
       '<span><span class="ttl">'+E(it.t)+'</span><span class="one">'+E(it.one)+'</span></span>'+
-      '<span>'+(it.badge?'<span class="badge b-'+it.badge+'">'+MODE[it.badge]+'</span> ':'')+
+      '<span>'+(it.badge?'<span class="badge b-'+it.badge+'">'+LET[it.badge]+'</span> ':'')+
       '<span class="chev" aria-hidden="true">&#9656;</span></span></button>'+
       '<div class="panel" id="'+id+'" hidden><p>'+E(it.more)+'</p>'+
-      (it.meta?'<div class="meta">'+E(it.meta)+'</div>':'')+'</div></div>';
-  }).join('');
+      (it.meta?'<div class="meta">'+E(it.meta)+'</div>':'')+'</div></div>';}).join('');
 }
 document.addEventListener('click',e=>{
-  const b=e.target.closest('.row > button');
-  if(b){const p=document.getElementById(b.getAttribute('aria-controls'));
+  const b=e.target.closest('.row > button, .rail button');
+  if(b&&b.hasAttribute('aria-controls')){
+    const p=document.getElementById(b.getAttribute('aria-controls'));
     const open=b.getAttribute('aria-expanded')==='true';
     b.setAttribute('aria-expanded',String(!open)); p.hidden=open; return;}
   const q=e.target.closest('[data-goto]');
   if(q){show(q.dataset.goto); if(q.dataset.sys) drawSys(q.dataset.sys);}
 });
 
-/* ---------- tabs, with arrow keys ---------- */
+/* ---------- tabs ---------- */
 const tabs=[...document.querySelectorAll('nav button')];
 function show(id){
   tabs.forEach(t=>{const on=t.getAttribute('aria-controls')===id;
     t.setAttribute('aria-selected',String(on)); t.tabIndex=on?0:-1;
     document.getElementById(t.getAttribute('aria-controls')).hidden=!on;});
-  history.replaceState(null,'','#'+id);
-  window.scrollTo(0,0);
+  history.replaceState(null,'','#'+id); window.scrollTo(0,0);
 }
 tabs.forEach((t,i)=>{
   t.addEventListener('click',()=>show(t.getAttribute('aria-controls')));
-  t.addEventListener('keydown',ev=>{
-    const k=ev.key; let n=null;
-    if(k==='ArrowRight')n=(i+1)%tabs.length;
-    else if(k==='ArrowLeft')n=(i-1+tabs.length)%tabs.length;
-    else if(k==='Home')n=0; else if(k==='End')n=tabs.length-1;
-    if(n!==null){ev.preventDefault();tabs[n].focus();show(tabs[n].getAttribute('aria-controls'));}
-  });
+  t.addEventListener('keydown',ev=>{let n=null;
+    if(ev.key==='ArrowRight')n=(i+1)%tabs.length;
+    else if(ev.key==='ArrowLeft')n=(i-1+tabs.length)%tabs.length;
+    else if(ev.key==='Home')n=0; else if(ev.key==='End')n=tabs.length-1;
+    if(n!==null){ev.preventDefault();tabs[n].focus();show(tabs[n].getAttribute('aria-controls'));}});
 });
 
 /* ---------- theme ---------- */
@@ -482,33 +667,103 @@ document.getElementById('theme').addEventListener('click',()=>{
 });
 try{const v=localStorage.getItem('ncsa-theme'); if(v)root.setAttribute('data-theme',v)}catch(_){}
 
-/* ---------- start ---------- */
-document.getElementById('keyfacts').innerHTML=
-  rows(KEYFACTS.map(f=>({t:f[0],one:f[1],more:f[2]})));
+/* ---------- the simulator ---------- */
+const tok=document.getElementById('tok'), stat=document.getElementById('stat'),
+      runBtn=document.getElementById('run'), waitlab=document.getElementById('waitlab');
+const STOPS=[
+ {x:65, msg:"<b>Approved.</b> A reviewer said yes. Nothing exists on the machine yet.",wait:900},
+ {x:197,msg:"<b>Recorded.</b> The award is in IDDS: project, amount, people, your UID.",wait:900},
+ {x:329,msg:"<b>Waiting.</b> acctd is a scheduled job. It has not woken up yet &mdash; this is the part that takes real time.",wait:2600,hold:true},
+ {x:461,msg:"<b>Entitled.</b> You are in the charge group. The directory now says you may use it.",wait:900},
+ {x:593,msg:"<b>In.</b> Duo proves you, the group permits you, Slurm checks the balance.",wait:0}
+];
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let running=false;
+function step(i){
+  if(i>=STOPS.length){running=false;runBtn.disabled=false;runBtn.textContent="Run it again";return;}
+  const s=STOPS[i];
+  tok.setAttribute('cx',s.x);
+  tok.setAttribute('opacity','1'); tok.setAttribute('fill','currentColor');
+  for(let k=1;k<=5;k++){const g=document.getElementById('st'+k);
+    if(g) g.classList.toggle('stage-on', k===i+1);}
+  stat.innerHTML=s.msg;
+  waitlab.setAttribute('opacity', s.hold?'0.85':'0');
+  setTimeout(()=>step(i+1), reduced?400:(s.wait||600)+(i?500:0));
+}
+runBtn.addEventListener('click',()=>{
+  if(running)return; running=true; runBtn.disabled=true; runBtn.textContent="Running…";
+  tok.setAttribute('cx',65); waitlab.setAttribute('opacity','0');
+  for(let k=1;k<=5;k++){const g=document.getElementById('st'+k); if(g)g.classList.remove('stage-on');}
+  setTimeout(()=>step(0),80);
+});
 
-/* ---------- systems ---------- */
+/* ---------- compare matrix ---------- */
+const COLS=[1,2,3,4,5,6];
+const worst=ms=>ms.includes('none')?'none':ms.includes('manual')?'manual':ms.length?'auto':null;
+function buildMatrix(){
+  let h='<thead><tr><th class="rowh">System</th>'+
+    COLS.map(c=>'<th scope="col">'+E(STAGE[c])+'</th>').join('')+'</tr></thead><tbody>';
+  SYS.forEach(s=>{
+    h+='<tr><th class="rowh" scope="row">'+E(s.label)+'</th>';
+    COLS.forEach(c=>{
+      const ms=s.steps.filter(st=>st[0]===c).map(st=>st[2]);
+      const w=worst(ms);
+      h+='<td>'+(w
+        ? '<button class="cell '+w+'" type="button" aria-pressed="false" data-s="'+s.id+'" data-c="'+c+
+          '" aria-label="'+E(s.label+', '+STAGE[c]+': '+MODE[w])+'">'+LET[w]+'</button>'
+        : '<div class="cell empty" aria-hidden="true"></div>')+'</td>';
+    });
+    h+='</tr>';
+  });
+  document.getElementById('mx').innerHTML=h+'</tbody>';
+}
+buildMatrix();
+document.getElementById('mx').addEventListener('click',e=>{
+  const b=e.target.closest('.cell'); if(!b||!b.dataset.s)return;
+  document.querySelectorAll('#mx .cell').forEach(c=>c.setAttribute('aria-pressed','false'));
+  b.setAttribute('aria-pressed','true');
+  const s=SYS.find(x=>x.id===b.dataset.s), c=+b.dataset.c;
+  const steps=s.steps.filter(st=>st[0]===c);
+  document.getElementById('mxout').innerHTML='<h2>'+E(s.label)+' &middot; '+E(STAGE[c])+'</h2>'+
+    rows(steps.map(st=>({t:st[3],one:st[1],badge:st[2],more:st[4]})))+
+    '<p class="small" style="margin-top:10px"><button class="q" style="border-left-width:3px;padding:8px 12px" type="button" data-goto="systems" data-sys="'+s.id+'">See the whole path for '+E(s.label)+'</button></p>';
+  document.getElementById('mxout').scrollIntoView({behavior:reduced?'auto':'smooth',block:'nearest'});
+});
+
+/* ---------- per-system path ---------- */
 const pick=document.getElementById('syspick');
 pick.innerHTML=SYS.map(s=>'<button type="button" data-sys="'+s.id+'" aria-pressed="false">'+E(s.label)+'</button>').join('');
 let curSys=SYS[0].id;
 function drawSys(id){
   const s=SYS.find(x=>x.id===id)||SYS[0]; curSys=s.id;
   [...pick.children].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sys===s.id)));
+  const n=s.steps.length, cnt={auto:0,manual:0,none:0};
+  s.steps.forEach(st=>cnt[st[2]]++);
+  document.getElementById('meter').innerHTML=['auto','manual','none'].map(k=>
+    cnt[k]?'<i class="'+k+'" style="width:'+(cnt[k]/n*100)+'%"></i>':'').join('');
+  document.getElementById('meterlab').innerHTML=
+    '<strong>'+cnt.manual+' of '+n+'</strong> steps need a person'+
+    (cnt.none?', and <strong>'+cnt.none+'</strong> nothing does at all':'')+'.';
   document.getElementById('sysfacts').innerHTML=
     s.facts.map(f=>'<span>'+E(f[0])+' <b>'+E(f[1])+'</b></span>').join('');
-  const only=document.getElementById('onlyman').checked;
-  const steps=s.steps.filter(st=>!only||st[2]!=='auto');
-  document.getElementById('sysflow').innerHTML= steps.length
-    ? rows(steps.map(st=>({t:st[3],one:STAGE[st[0]]+' · '+st[1],badge:st[2],more:st[4]})))
-    : '<div class="row"><button type="button" aria-expanded="false" aria-controls="none0"><span><span class="ttl">No manual steps</span><span class="one">This path runs without a person.</span></span><span class="chev" aria-hidden="true">&#9656;</span></button><div class="panel" id="none0" hidden><p>Every step on this path is automated.</p></div></div>';
-  const n=s.note;
+  document.getElementById('sysflow').innerHTML=s.steps.map(st=>{
+    const id2="r"+(++uid);
+    return '<li><span class="dot '+st[2]+'" aria-hidden="true"></span>'+
+      '<button type="button" aria-expanded="false" aria-controls="'+id2+'">'+
+      '<span><span class="ttl">'+E(st[3])+'</span>'+
+      '<span class="one">'+E(STAGE[st[0]]+' · '+st[1])+'</span></span>'+
+      '<span><span class="badge b-'+st[2]+'">'+LET[st[2]]+'</span> '+
+      '<span class="chev" aria-hidden="true">&#9656;</span></span></button>'+
+      '<div class="panel" id="'+id2+'" hidden>'+E(st[4])+'</div></li>';
+  }).join('');
+  const nt=s.note;
   document.getElementById('sysnote').innerHTML='<h2>Worth knowing</h2>'+
-    rows([{t:n[1],one:'',badge:n[0],more:n[2]}]);
+    rows([{t:nt[1],one:'',badge:nt[0],more:nt[2]}]);
 }
 pick.addEventListener('click',e=>{const b=e.target.closest('button[data-sys]'); if(b)drawSys(b.dataset.sys);});
-document.getElementById('onlyman').addEventListener('change',()=>drawSys(curSys));
 drawSys(curSys);
 
-/* ---------- pieces, searchable ---------- */
+/* ---------- pieces ---------- */
 const plist=document.getElementById('plist'), pcount=document.getElementById('pcount');
 function drawPieces(q){
   q=(q||'').trim().toLowerCase();
@@ -521,13 +776,10 @@ function drawPieces(q){
 document.getElementById('psearch').addEventListener('input',e=>drawPieces(e.target.value));
 drawPieces('');
 
-/* ---------- logins ---------- */
+/* ---------- logins + glossary ---------- */
 document.getElementById('credt').innerHTML=CREDS.map(c=>
   '<tr><td><strong>'+E(c[0])+'</strong></td><td>'+E(c[1])+'</td><td>'+E(c[2])+'</td></tr>').join('');
-document.getElementById('idrows').innerHTML=
-  rows(IDNOTES.map(n=>({t:n[0],one:n[1],more:n[2]})));
-
-/* ---------- glossary, searchable ---------- */
+document.getElementById('idrows').innerHTML=rows(IDNOTES.map(n=>({t:n[0],one:n[1],more:n[2]})));
 const glist=document.getElementById('glist');
 function drawGloss(q){
   q=(q||'').trim().toLowerCase();
@@ -540,7 +792,6 @@ function drawGloss(q){
 document.getElementById('gsearch').addEventListener('input',e=>drawGloss(e.target.value));
 drawGloss('');
 
-/* ---------- deep link ---------- */
 const h=location.hash.slice(1);
 if(h&&document.getElementById(h)&&document.getElementById(h).getAttribute('role')==='tabpanel')show(h);
 </script>
