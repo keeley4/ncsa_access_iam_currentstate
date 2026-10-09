@@ -4,1009 +4,545 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How Access Works at NCSA</title>
-<meta name="description" content="A plain-language guide to the systems that turn an approved allocation into a working account at NCSA - what each component does, and how the path differs by system.">
-<meta name="author" content="NCSA">
+<meta name="description" content="What happens between an approved allocation and a working account at NCSA.">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
-  --bg:#F7F8FA; --panel:#FFFFFF; --panel2:#F0F2F6; --ink:#121721; --ink2:#4A5468;
-  --ink3:#6E7788; --line:#DCE1E9; --line2:#C3CAD6;
-  --accent:#1E5FB4; --accent-soft:#E6EFFB;
-  --auto:#11705A; --auto-bg:#E1F2ED;
-  --manual:#9A5B06; --manual-bg:#FBEEDB;
-  --none:#8A3030; --none-bg:#F8E4E4;
-  --note:#5A4AA8; --note-bg:#ECE9F9;
-  --radius:12px; --maxw:1180px;
-  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
-  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --bg:#F7F8FA; --panel:#FFF; --panel2:#EFF2F6; --ink:#121721; --ink2:#434D5E; --ink3:#5A6473;
+  --line:#DBE0E8; --line2:#B9C1CE; --accent:#17539E; --accent-bg:#E7EFFA;
+  --auto:#0D6650; --auto-bg:#DEF1EB; --manual:#8A5104; --manual-bg:#FBEBD4;
+  --none:#8A2B2B; --none-bg:#F9E1E1; --r:10px;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#0E1218; --panel:#161C25; --panel2:#1E2631; --ink:#E9EDF3; --ink2:#AEB8C6;
-    --ink3:#7F8A99; --line:#2A333F; --line2:#3A4654;
-    --accent:#6BA6F2; --accent-soft:#17304F;
-    --auto:#5FD7B6; --auto-bg:#10332B;
-    --manual:#EFBB6B; --manual-bg:#3A2C14;
-    --none:#F09191; --none-bg:#3A1E1E;
-    --note:#B5A8F5; --note-bg:#252046;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0E1218; --panel:#161C25; --panel2:#1E2631; --ink:#E9EDF3; --ink2:#AEB8C6;
-  --ink3:#7F8A99; --line:#2A333F; --line2:#3A4654;
-  --accent:#6BA6F2; --accent-soft:#17304F;
-  --auto:#5FD7B6; --auto-bg:#10332B;
-  --manual:#EFBB6B; --manual-bg:#3A2C14;
-  --none:#F09191; --none-bg:#3A1E1E;
-  --note:#B5A8F5; --note-bg:#252046;
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0D1117; --panel:#161C24; --panel2:#1F2731; --ink:#EAEEF4; --ink2:#B4BECC; --ink3:#8D97A5;
+  --line:#2A333E; --line2:#3C4654; --accent:#7CB0F5; --accent-bg:#152C49;
+  --auto:#63DCBA; --auto-bg:#0E322A; --manual:#F2C075; --manual-bg:#3A2B12;
+  --none:#F29A9A; --none-bg:#3B1F1F;
+}}
+:root[data-theme=dark]{
+  --bg:#0D1117; --panel:#161C24; --panel2:#1F2731; --ink:#EAEEF4; --ink2:#B4BECC; --ink3:#8D97A5;
+  --line:#2A333E; --line2:#3C4654; --accent:#7CB0F5; --accent-bg:#152C49;
+  --auto:#63DCBA; --auto-bg:#0E322A; --manual:#F2C075; --manual-bg:#3A2B12;
+  --none:#F29A9A; --none-bg:#3B1F1F;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
-  font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
-.wrap{max-width:var(--maxw);margin:0 auto;padding:0 16px}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px}
 a{color:var(--accent)}
-code,kbd{font-family:var(--mono);font-size:.88em;background:var(--panel2);
-  padding:.1em .35em;border-radius:5px;border:1px solid var(--line)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+.skip{position:absolute;left:-9999px}
+.skip:focus{left:8px;top:8px;z-index:99;background:var(--panel);padding:8px 14px;
+  border:2px solid var(--accent);border-radius:8px}
+code{font-family:var(--mono);font-size:.9em}
 
-/* header */
-header.site{border-bottom:1px solid var(--line);background:var(--panel);
-  position:sticky;top:0;z-index:50}
-.site-inner{max-width:var(--maxw);margin:0 auto;padding:14px 16px 0;
-  display:flex;flex-wrap:wrap;gap:12px;align-items:baseline}
-.brand{font-weight:650;font-size:1.05rem;letter-spacing:-.01em}
-.brand span{color:var(--ink3);font-weight:450}
-.themebtn{margin-left:auto;background:none;border:1px solid var(--line2);
-  color:var(--ink2);border-radius:999px;padding:4px 12px;font-size:.8rem;cursor:pointer;
-  font-family:inherit}
-.themebtn:hover{border-color:var(--accent);color:var(--accent)}
-nav.tabs{max-width:var(--maxw);margin:0 auto;padding:8px 16px 0;
-  display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
-nav.tabs::-webkit-scrollbar{display:none}
-nav.tabs button{background:none;border:0;border-bottom:2px solid transparent;
-  color:var(--ink3);font:inherit;font-size:.92rem;padding:8px 12px 10px;cursor:pointer;
-  white-space:nowrap}
-nav.tabs button:hover{color:var(--ink)}
-nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);
-  font-weight:600}
+header{border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20}
+.bar{max-width:860px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:center;gap:12px}
+.brand{font-weight:650;font-size:.98rem}
+.brand span{color:var(--ink3);font-weight:400}
+.theme{margin-left:auto;background:none;border:1px solid var(--line2);color:var(--ink2);
+  border-radius:999px;padding:5px 13px;font:inherit;font-size:.8rem;cursor:pointer}
+nav{max-width:860px;margin:0 auto;padding:6px 16px 0;display:flex;gap:2px;overflow-x:auto}
+nav button{background:none;border:0;border-bottom:2.5px solid transparent;color:var(--ink3);
+  font:inherit;font-size:.9rem;padding:8px 11px 9px;cursor:pointer;white-space:nowrap}
+nav button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent);font-weight:620}
 
-main{padding:28px 0 72px}
-section[role="tabpanel"][hidden]{display:none}
-h1{font-size:1.75rem;line-height:1.2;letter-spacing:-.02em;margin:0 0 8px}
-h2{font-size:1.2rem;letter-spacing:-.01em;margin:34px 0 10px}
-h3{font-size:1rem;margin:22px 0 6px}
-.lede{color:var(--ink2);font-size:1.05rem;max-width:68ch;margin:0 0 22px}
-p{max-width:72ch}
-.muted{color:var(--ink3);font-size:.88rem}
+main{padding:26px 0 70px}
+[role=tabpanel][hidden]{display:none}
+h1{font-size:1.55rem;line-height:1.2;margin:0 0 6px;letter-spacing:-.02em}
+h2{font-size:1.05rem;margin:30px 0 10px;letter-spacing:-.01em}
+.sub{color:var(--ink2);margin:0 0 22px;font-size:1rem}
+p{margin:0 0 10px}
+.small{font-size:.86rem;color:var(--ink3)}
 
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-  padding:16px 18px}
-.grid{display:grid;gap:14px}
-.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
-.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-
-/* badges */
-.badge{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;
-  letter-spacing:.02em;text-transform:uppercase;padding:2px 8px;border-radius:999px;
-  border:1px solid currentColor;white-space:nowrap}
+.badge{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid currentColor}
 .b-auto{color:var(--auto);background:var(--auto-bg)}
 .b-manual{color:var(--manual);background:var(--manual-bg)}
 .b-none{color:var(--none);background:var(--none-bg)}
-.b-note{color:var(--note);background:var(--note-bg)}
-.b-plain{color:var(--ink3);background:var(--panel2)}
 
-/* stage board */
-.stages{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0 6px}
-@media (max-width:900px){.stages{grid-template-columns:1fr 1fr}}
-@media (max-width:520px){.stages{grid-template-columns:1fr}}
-.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-  padding:14px;position:relative}
-.stage .n{font-family:var(--mono);font-size:.72rem;color:var(--accent);font-weight:700}
-.stage h4{margin:4px 0 6px;font-size:.95rem}
-.stage p{font-size:.86rem;color:var(--ink2);margin:0;max-width:none}
-.stage .who{margin-top:9px;font-family:var(--mono);font-size:.75rem;color:var(--ink3);
-  border-top:1px dashed var(--line2);padding-top:7px}
+/* disclosure rows */
+.rows{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--panel)}
+.row+.row{border-top:1px solid var(--line)}
+.row>button{width:100%;text-align:left;background:none;border:0;font:inherit;cursor:pointer;
+  padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+  color:var(--ink)}
+.row>button:hover{background:var(--panel2)}
+.row .ttl{font-weight:600;font-size:.94rem}
+.row .one{color:var(--ink2);font-size:.88rem;display:block;margin-top:2px}
+.row .chev{color:var(--ink3);font-size:.8rem;transition:transform .15s}
+.row>button[aria-expanded=true] .chev{transform:rotate(90deg)}
+.panel{padding:0 14px 14px 14px;font-size:.89rem;color:var(--ink2);border-top:1px dashed var(--line)}
+.panel p{margin:10px 0 0}
+.panel .meta{font-family:var(--mono);font-size:.74rem;color:var(--ink3);margin-top:9px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
-/* path explorer */
-.picker{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 18px}
-.picker button{background:var(--panel);border:1px solid var(--line2);color:var(--ink2);
-  border-radius:999px;padding:6px 14px;font:inherit;font-size:.88rem;cursor:pointer}
-.picker button:hover{border-color:var(--accent);color:var(--ink)}
-.picker button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);
+/* question cards */
+.qs{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:0 0 8px}
+.q{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:var(--r);padding:13px 15px;font:inherit;text-align:left;cursor:pointer;color:var(--ink)}
+.q:hover{background:var(--panel2)}
+.q b{display:block;font-size:.93rem;margin-bottom:3px}
+.q span{font-size:.85rem;color:var(--ink2)}
+
+/* stage rail */
+.rail{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:6px 0 4px}
+@media (max-width:700px){.rail{grid-template-columns:1fr 1fr}}
+@media (max-width:420px){.rail{grid-template-columns:1fr}}
+.rail div{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:10px 11px}
+.rail b{display:block;font-size:.85rem}
+.rail span{font-size:.78rem;color:var(--ink2)}
+.rail em{display:block;font-family:var(--mono);font-size:.7rem;color:var(--ink3);
+  font-style:normal;margin-top:5px}
+
+/* controls */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.chips button{background:var(--panel);border:1px solid var(--line2);color:var(--ink2);
+  border-radius:999px;padding:5px 13px;font:inherit;font-size:.85rem;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);
   color:#fff;font-weight:600}
-.sysmeta{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-  margin:0 0 20px}
-.fact{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
-.fact dt{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);
-  font-weight:650;margin:0 0 3px}
-.fact dd{margin:0;font-size:.9rem;color:var(--ink)}
+input[type=search]{width:100%;padding:9px 13px;font:inherit;font-size:.92rem;
+  border:1px solid var(--line2);border-radius:999px;background:var(--panel);color:var(--ink);
+  margin:0 0 12px}
+.facts{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.facts span{background:var(--panel2);border:1px solid var(--line);border-radius:999px;
+  padding:4px 11px;font-size:.8rem;color:var(--ink2)}
+.facts span b{color:var(--ink);font-weight:620}
+.toggle{display:flex;align-items:center;gap:7px;font-size:.86rem;color:var(--ink2);margin:0 0 12px}
 
-.flow{display:flex;flex-direction:column;gap:0;margin:8px 0 10px}
-.step{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-  padding:14px 16px;display:grid;grid-template-columns:34px 1fr auto;gap:14px;
-  align-items:start}
-.step .idx{font-family:var(--mono);font-size:.78rem;color:var(--ink3);font-weight:700;
-  background:var(--panel2);border-radius:8px;text-align:center;padding:4px 0;
-  border:1px solid var(--line)}
-.step h4{margin:0 0 3px;font-size:.98rem;letter-spacing:-.01em}
-.step .steplabel{font-family:var(--mono);font-size:.78rem;color:var(--accent);
-  display:block;margin:0 0 5px}
-.step p{margin:0;font-size:.89rem;color:var(--ink2);max-width:62ch}
-.step .flag{font-size:.8rem;color:var(--ink3);margin-top:6px;display:block}
-.connector{height:18px;margin-left:33px;border-left:2px solid var(--line2);width:0}
-.step.is-manual{border-left:3px solid var(--manual)}
-.step.is-auto{border-left:3px solid var(--auto)}
-.step.is-none{border-left:3px solid var(--none)}
-
-/* component cards */
-.filterbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 16px}
-.comp{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-  padding:15px 17px}
-.comp h3{margin:0 0 2px;font-size:1rem}
-.comp .full{font-size:.78rem;color:var(--ink3);display:block;margin-bottom:9px}
-.comp .job{font-size:.9rem;color:var(--ink);margin:0 0 9px;max-width:none}
-.comp .not{font-size:.85rem;color:var(--ink2);margin:0 0 9px;max-width:none;
-  border-left:2px solid var(--line2);padding-left:10px}
-.comp .meta{font-family:var(--mono);font-size:.74rem;color:var(--ink3);
-  border-top:1px solid var(--line);padding-top:8px;margin-top:10px}
-.comp .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
-
-table{border-collapse:collapse;width:100%;font-size:.88rem;margin:10px 0 4px}
-th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);
-  vertical-align:top}
-th{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);
-  font-weight:650;border-bottom:1px solid var(--line2)}
-.tablewrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);
-  border-radius:var(--radius);padding:4px 14px 10px}
-
-.gloss{display:grid;gap:0}
-.gloss div{display:grid;grid-template-columns:170px 1fr;gap:16px;padding:11px 0;
-  border-bottom:1px solid var(--line)}
-.gloss dt{font-weight:650;font-size:.92rem}
-.gloss dd{margin:0;font-size:.9rem;color:var(--ink2)}
-@media (max-width:620px){.gloss div{grid-template-columns:1fr;gap:2px}}
-
-.callout{background:var(--accent-soft);border:1px solid var(--line);border-left:3px solid var(--accent);
-  border-radius:8px;padding:12px 15px;margin:16px 0;font-size:.9rem;color:var(--ink)}
-.callout p{margin:0;max-width:none}
-
-footer.site{border-top:1px solid var(--line);padding:22px 0 44px;color:var(--ink3);
-  font-size:.85rem}
-footer.site p{max-width:72ch}
-.legend{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0 20px;font-size:.82rem;
-  color:var(--ink2);align-items:center}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3)}
+.tw{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  padding:2px 12px 8px}
+.note{background:var(--accent-bg);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:8px;padding:11px 14px;font-size:.88rem;margin:14px 0}
+.note p{margin:0}
+footer{border-top:1px solid var(--line);padding:20px 0 40px;font-size:.84rem;color:var(--ink3)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--ink2);margin:12px 0 0}
 </style>
 </head>
 <body>
-<header class="site">
-  <div class="site-inner">
+<a class="skip" href="#main">Skip to content</a>
+<header>
+  <div class="bar">
     <div class="brand">How access works at NCSA <span>&middot; current state</span></div>
-    <button class="themebtn" id="themebtn" type="button">Theme</button>
+    <button class="theme" id="theme" type="button">Theme</button>
   </div>
-  <nav class="tabs" role="tablist" aria-label="Sections">
-    <button role="tab" id="tab-overview" aria-controls="overview" aria-selected="true">Start here</button>
-    <button role="tab" id="tab-systems" aria-controls="systems" aria-selected="false">By system</button>
-    <button role="tab" id="tab-pieces" aria-controls="pieces" aria-selected="false">The pieces</button>
-    <button role="tab" id="tab-logins" aria-controls="logins" aria-selected="false">Logins &amp; identity</button>
-    <button role="tab" id="tab-glossary" aria-controls="glossary" aria-selected="false">Glossary</button>
+  <nav role="tablist" aria-label="Sections">
+    <button role="tab" id="t-start" aria-controls="start" aria-selected="true">Start</button>
+    <button role="tab" id="t-systems" aria-controls="systems" aria-selected="false" tabindex="-1">By system</button>
+    <button role="tab" id="t-pieces" aria-controls="pieces" aria-selected="false" tabindex="-1">The pieces</button>
+    <button role="tab" id="t-logins" aria-controls="logins" aria-selected="false" tabindex="-1">Logins</button>
+    <button role="tab" id="t-glossary" aria-controls="glossary" aria-selected="false" tabindex="-1">Glossary</button>
   </nav>
 </header>
 
-<main class="wrap">
+<main class="wrap" id="main">
 
-<!-- ============ OVERVIEW ============ -->
-<section id="overview" role="tabpanel" aria-labelledby="tab-overview">
+<section id="start" role="tabpanel" aria-labelledby="t-start" tabindex="0">
   <h1>An award is not access.</h1>
-  <p class="lede">Someone approves an allocation. Days or minutes later a researcher can run
-  a job. In between sit about a dozen systems, most of which almost nobody at NCSA has
-  reason to name. This page explains what each one does, in plain language, and shows how
-  the path differs depending on which system the researcher is trying to use.</p>
+  <p class="sub">About a dozen systems sit between &ldquo;approved&rdquo; and &ldquo;logged in.&rdquo;
+  Here is what each one does.</p>
 
-  <div class="callout">
-    <p><strong>Who this is for.</strong> Anyone at NCSA who keeps hearing
-    &ldquo;IDDS,&rdquo; &ldquo;acctd&rdquo; or &ldquo;charge group&rdquo; and has never been told
-    what they are. It is not an administration guide and not a design proposal &mdash; it
-    describes how things work today, as of late 2026.</p>
+  <h2>Start with your question</h2>
+  <div class="qs">
+    <button class="q" data-goto="systems" data-sys="delta-access"><b>Approved &mdash; why can&rsquo;t I log in?</b><span>Provisioning is a timed batch job, not an instant reaction.</span></button>
+    <button class="q" data-goto="logins"><b>Which password does this want?</b><span>NCSA and campus are separate domains, with separate Duo.</span></button>
+    <button class="q" data-goto="pieces"><b>What is IDDS? acctd?</b><span>One line each, expand for more.</span></button>
+    <button class="q" data-goto="systems"><b>How does my system work?</b><span>Step by step, with the manual bits marked.</span></button>
   </div>
 
-  <h2>Five things have to happen</h2>
-  <p>Every path to an NCSA resource &mdash; every program, every system &mdash; passes through
-  the same five stages. The names of the components change; the stages do not.</p>
-
-  <div class="stages">
-    <div class="stage">
-      <div class="n">STAGE 1</div>
-      <h4>Request &amp; approval</h4>
-      <p>A researcher asks for time or space, and a reviewer says yes. This is a
-      programmatic decision, not a technical one.</p>
-      <div class="who">XRAS &middot; AMIE &middot; IC form &middot; Jira</div>
-    </div>
-    <div class="stage">
-      <div class="n">STAGE 2</div>
-      <h4>Allocation of record</h4>
-      <p>The approved award is written down somewhere authoritative: who gets how much,
-      on what, until when.</p>
-      <div class="who">IDDS</div>
-    </div>
-    <div class="stage">
-      <div class="n">STAGE 3</div>
-      <h4>Provisioning</h4>
-      <p>Something turns that record into real technical objects &mdash; accounts, groups,
-      budgets &mdash; on the actual machine.</p>
-      <div class="who">acctd &middot; Savannah sync &middot; people</div>
-    </div>
-    <div class="stage">
-      <div class="n">STAGE 4</div>
-      <h4>Entitlement</h4>
-      <p>The permission is recorded somewhere every service can read. In practice at NCSA,
-      that means group membership in a directory.</p>
-      <div class="who">NCSA LDAP</div>
-    </div>
-    <div class="stage">
-      <div class="n">STAGE 5</div>
-      <h4>Enforcement</h4>
-      <p>The resource itself decides, at the moment of use, whether to let the job run or
-      the file be read.</p>
-      <div class="who">Slurm &middot; filesystem &middot; SSH</div>
-    </div>
+  <h2>Five stages, every time</h2>
+  <div class="rail">
+    <div><b>1 Request</b><span>Someone says yes.</span><em>XRAS · AMIE</em></div>
+    <div><b>2 Record</b><span>The award is written down.</span><em>IDDS</em></div>
+    <div><b>3 Provision</b><span>Objects made on the machine.</span><em>acctd</em></div>
+    <div><b>4 Entitlement</b><span>Permission put somewhere readable.</span><em>LDAP group</em></div>
+    <div><b>5 Enforcement</b><span>The resource checks, at use.</span><em>Slurm · SSH</em></div>
   </div>
+  <p class="small">Identity runs alongside all five. Being known to a machine grants you nothing.</p>
 
-  <p class="muted">Identity runs alongside all five and is <em>not</em> one of them. Having an
-  NCSA account tells a machine who you are; it grants you nothing. See
-  <a href="#" data-goto="logins">Logins &amp; identity</a>.</p>
-
-  <h2>The shortest honest description</h2>
-  <div class="grid g2" style="margin-top:12px">
-    <div class="card">
-      <h3 style="margin-top:0">Three things carry almost all the weight</h3>
-      <p style="font-size:.92rem;color:var(--ink2)"><strong>IDDS</strong> is the database that
-      knows what was awarded. <strong>acctd</strong> is the machinery that delivers it to
-      resources. <strong>NCSA LDAP</strong> is the directory every service reads at login.
-      If you understand those three and the order they run in, you can follow almost any
-      access question at NCSA.</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-top:0">Two writers, one directory</h3>
-      <p style="font-size:.92rem;color:var(--ink2)">LDAP is written by two separate things.
-      A sync script running on Savannah writes <em>who you are</em> &mdash; your name, email,
-      UID &mdash; into the main branch. <code>acctd</code> writes <em>what you are allowed to
-      use</em> into per-resource branches. They do not coordinate, and the per-resource
-      branches have no named owner.</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-top:0">It is a batch job, not an event</h3>
-      <p style="font-size:.92rem;color:var(--ink2)">Nothing fires the moment an award is
-      approved. Jobs run on a timer and ask &ldquo;anything new?&rdquo; This is why access
-      appears some minutes or hours after approval rather than immediately, and it is the
-      single most common source of &ldquo;it was approved, why can&rsquo;t I log in.&rdquo;</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-top:0">Automation is the exception, not the rule</h3>
-      <p style="font-size:.92rem;color:var(--ink2)">Delta and Hydro are the only NCSA systems
-      where an approval becomes a working project with no human in the loop. Everywhere
-      else &mdash; Radiant, Taiga, Granite, Nightingale, the Campus Cluster &mdash; a person
-      performs at least one documented step by hand.</p>
-    </div>
-  </div>
-
-  <h2>How to read the rest of this</h2>
-  <p><a href="#" data-goto="systems"><strong>By system</strong></a> is the practical page: pick
-  a resource, see the path a request actually takes through it and where a person has to act.
-  <a href="#" data-goto="pieces"><strong>The pieces</strong></a> is the reference: one card per
-  component, what it does and what it is often mistaken for.
-  <a href="#" data-goto="logins"><strong>Logins &amp; identity</strong></a> explains why one
-  researcher ends up with four or five credentials. <a href="#" data-goto="glossary"><strong>Glossary</strong></a>
-  decodes the acronyms.</p>
+  <h2>Four things worth knowing</h2>
+  <div class="rows" id="keyfacts"></div>
 
   <div class="legend">
-    <span class="badge b-auto">Automated</span> a machine does this
-    <span class="badge b-manual">Manual</span> a person does this
-    <span class="badge b-none">Absent</span> nothing does this today
-    <span class="badge b-note">Note</span> worth knowing
+    <span><span class="badge b-auto">Auto</span> a machine does it</span>
+    <span><span class="badge b-manual">Manual</span> a person does it</span>
+    <span><span class="badge b-none">None</span> nothing does it</span>
   </div>
 </section>
 
-<!-- ============ SYSTEMS ============ -->
-<section id="systems" role="tabpanel" aria-labelledby="tab-systems" hidden>
+<section id="systems" role="tabpanel" aria-labelledby="t-systems" tabindex="0" hidden>
   <h1>By system</h1>
-  <p class="lede">The same five stages, but the components and the amount of human effort differ
-  a great deal from one resource to the next. Pick one.</p>
-  <div class="picker" id="syspicker" role="group" aria-label="Choose a system"></div>
-  <dl class="sysmeta" id="sysmeta"></dl>
-  <h2 id="pathhead">The path</h2>
-  <div class="flow" id="sysflow"></div>
-  <div id="sysnotes"></div>
+  <p class="sub">Same five stages. Very different amounts of human effort.</p>
+  <div class="chips" id="syspick" role="group" aria-label="Choose a system"></div>
+  <div class="facts" id="sysfacts"></div>
+  <label class="toggle"><input type="checkbox" id="onlyman"> Show only the steps a person does</label>
+  <div class="rows" id="sysflow"></div>
+  <div id="sysnote"></div>
 </section>
 
-<!-- ============ PIECES ============ -->
-<section id="pieces" role="tabpanel" aria-labelledby="tab-pieces" hidden>
+<section id="pieces" role="tabpanel" aria-labelledby="t-pieces" tabindex="0" hidden>
   <h1>The pieces</h1>
-  <p class="lede">One card per component. Each says what the thing actually does, and &mdash;
-  usually more useful &mdash; what it is commonly assumed to do but does not.</p>
-  <div class="filterbar" id="compfilter" role="group" aria-label="Filter components"></div>
-  <div class="grid g2" id="complist"></div>
+  <p class="sub">What each thing does &mdash; and what it gets mistaken for.</p>
+  <input type="search" id="psearch" placeholder="Search the pieces…" aria-label="Search the pieces">
+  <div class="rows" id="plist"></div>
+  <p class="small" id="pcount" role="status" style="margin-top:10px"></p>
 </section>
 
-<!-- ============ LOGINS ============ -->
-<section id="logins" role="tabpanel" aria-labelledby="tab-logins" hidden>
-  <h1>Logins &amp; identity</h1>
-  <p class="lede">A single researcher at Illinois can legitimately hold five or six different
-  credentials. They are issued by different organisations for different purposes, and nothing
-  automatically connects them to each other.</p>
-
-  <h2>Which credential opens which door</h2>
-  <div class="tablewrap">
-    <table>
-      <thead><tr><th>Credential</th><th>Issued by</th><th>Second factor</th><th>Gets you into</th></tr></thead>
-      <tbody id="credtable"></tbody>
-    </table>
-  </div>
-
-  <h2>Why there is no single sign-on across all of it</h2>
-  <div class="grid g2" style="margin-top:12px">
-    <div class="card">
-      <h3 style="margin-top:0">They answer different questions</h3>
-      <p style="font-size:.92rem;color:var(--ink2)">A NetID says you are a member of the
-      University. An NCSA identity says you are known to NCSA&rsquo;s own systems. An ACCESS ID
-      says you are a researcher registered with a national programme. None of these implies
-      the others, and NCSA&rsquo;s standing policy is that resources default to NCSA identities
-      only &mdash; linking an external identity in is a decision that needs CISO approval.</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-top:0">Nothing reconciles them</h3>
-      <p style="font-size:.92rem;color:var(--ink2)">There is no service that can answer
-      &ldquo;this NetID and this ACCESS ID are the same human.&rdquo; Staff NCSA accounts do get a
-      link to the campus identifier at creation, but that is the only automatic one. Everywhere
-      else the match is made by hand, on name and email &mdash; which is also why duplicate
-      accounts for the same person occur and have to be repaired manually.</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-top:0">LDAP and Kerberos are both involved</h3>
-      <p style="font-size:.92rem;color:var(--ink2)">A complete NCSA identity record is split:
-      LDAP holds the attributes (name, email, UID, group memberships), Kerberos holds the
-      password. This is ordinary for a Unix environment, but it means turning someone off is
-      not a single operation &mdash; it touches more than one store.</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-top:0">Where the account actually comes from</h3>
-      <p style="font-size:.92rem;color:var(--ink2)">NCSA identities are minted by IDDS, which
-      generates the UID and GID. A sync script running on Savannah copies the identity
-      attributes into LDAP. Account creation, password resets and deletions travel through a
-      message queue between the identity web front end and Kerberos &mdash; legacy plumbing the
-      Identity Coordination group is working to retire.</p>
-    </div>
-  </div>
-
-  <div class="callout">
-    <p><strong>Practical consequence.</strong> If you are trying to help someone and they say
-    &ldquo;I can&rsquo;t log in,&rdquo; the first useful question is not <em>what&rsquo;s your
-    username</em> but <em>which system, and which login did you use</em>. Delta over SSH and the
-    Campus Cluster over SSH want credentials from two entirely separate identity domains with
-    two separate Duo enrolments.</p>
-  </div>
+<section id="logins" role="tabpanel" aria-labelledby="t-logins" tabindex="0" hidden>
+  <h1>Logins</h1>
+  <p class="sub">One researcher, five or six credentials. Nothing joins them up.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Credential</th><th>Second factor</th><th>Opens</th></tr></thead>
+    <tbody id="credt"></tbody>
+  </table></div>
+  <div class="note"><p><strong>Most common mix-up.</strong> Delta wants your NCSA password and
+  NCSA Duo. The Campus Cluster wants your NetID password and Illinois Duo. Different domains,
+  different Duo enrolments.</p></div>
+  <div class="rows" id="idrows"></div>
 </section>
 
-<!-- ============ GLOSSARY ============ -->
-<section id="glossary" role="tabpanel" aria-labelledby="tab-glossary" hidden>
+<section id="glossary" role="tabpanel" aria-labelledby="t-glossary" tabindex="0" hidden>
   <h1>Glossary</h1>
-  <p class="lede">Every acronym on this page, decoded.</p>
-  <dl class="gloss" id="glosslist"></dl>
+  <input type="search" id="gsearch" placeholder="Search terms…" aria-label="Search glossary">
+  <div class="tw"><table><tbody id="glist"></tbody></table></div>
 </section>
 
 </main>
 
-<footer class="site">
-  <div class="wrap">
-    <p><strong>How current is this?</strong> It reflects the NCSA IAM and access discovery
-    record as of October 2026. Most of it is derived from internal documentation and from
-    read-only inspection of live systems; some of it is documented but not independently
-    confirmed, and those places are marked. Corrections to the boundaries are more valuable
-    than added detail &mdash; if something here is wrong, say so.</p>
-    <p class="muted" style="margin-top:14px">Maintained by Chris Keeley
-    (<a href="mailto:keeley4@illinois.edu">keeley4@illinois.edu</a>). Corrections and
-    additions welcome &mdash; email me directly. Describes current state only; nothing
-    here is a proposed architecture.</p>
-  </div>
-</footer>
+<footer><div class="wrap">
+  <p>Current state as of October 2026, from the NCSA IAM discovery record. Some of it is
+  documented but unconfirmed. Corrections welcome &mdash;
+  <a href="mailto:keeley4@illinois.edu">keeley4@illinois.edu</a>.</p>
+</div></footer>
 <script>
-/* ---------------------------------------------------------------
-   Data. Everything shown on the page is defined here.
-   stage: 1 request / 2 record / 3 provision / 4 entitlement
-          5 enforcement / 0 identity / 6 usage & money
-   --------------------------------------------------------------- */
-
-const COMPONENTS = [
- {id:"xras", name:"XRAS", full:"eXtensible Resource Allocation System", stage:1,
-  job:"The web application where an allocation request is submitted, reviewed and approved. NCSA builds and hosts it for the national ACCESS programme and also uses its own instance for Illinois allocations.",
-  not:"Being configured in XRAS does not mean a resource is wired up. There are three different states: fully integrated and provisioning (Delta), request-capture and reporting only (the Campus Cluster — approving there triggers nothing downstream), and stale leftovers for resources that no longer exist.",
-  meta:"Runs centrally · ~350 requests/yr on the NCSA instance",
-  tags:[["Automated","auto"]]},
-
- {id:"amie", name:"AMIE", full:"the message channel between ACCESS and a resource provider", stage:1,
-  job:"Carries allocation packets from national ACCESS allocations into NCSA, so an award made centrally becomes a local project without anyone retyping it.",
-  not:"It is not fire-and-forget. If the named person has no NCSA account yet, the packet waits and no later packet for that person is honoured until the account exists. Help desk staff email the PI — sometimes repeatedly — to get the account created. It is a follow-through gap, not a silent one.",
-  meta:"Live in production · two integrations: inbound packets, outbound usage reporting",
-  tags:[["Automated","auto"],["Needs follow-up","manual"]]},
-
- {id:"icform", name:"Illinois Computes request form", full:"request.computes.illinois.edu", stage:1,
-  job:"The front door for Illinois Computes allocations. A submission becomes a Jira ticket, which staff then enter into the NCSA XRAS instance.",
-  not:"It is not connected directly to the allocations database. The hop from form to allocation of record has people in it.",
-  meta:"~1,300 requests since Mar 2023 · roughly three quarters approved",
-  tags:[["Manual step","manual"]]},
-
- {id:"jira", name:"Jira / SUP", full:"NCSA Support Help Center", stage:1,
-  job:"The support queue. For several resources a ticket is not a complaint — it is a required step in the provisioning path, the mechanism by which a human is asked to create something.",
-  not:"It is not one queue. There are 20+ projects and many email aliases, and the right destination differs by system; a single Delta user can have three depending on which programme funded them.",
-  meta:"~12,200 SUP tickets/yr · about 10% concern access, login or passwords",
-  tags:[["Manual step","manual"]]},
-
- {id:"idds", name:"IDDS", full:"the NCSA allocations database", stage:2,
-  job:"The record of what was awarded: which project, which resource, how much, which people, until when. It also mints the identifiers — it generates the UID for each NCSA login and the GIDs for groups.",
-  not:"It is not an identity system, though it holds a surprising amount of identity data. It also has no table called 'projects' — a project is a charge number on the accounts table, and state is always attached to a (project, resource) pair rather than to the project on its own. That detail is why 'deactivate this project on just one machine' has no interface.",
-  meta:"PostgreSQL, schema acct · runs on idds-prod",
-  tags:[["Automated","auto"],["System of record","note"]]},
-
- {id:"acctd", name:"acctd", full:"the provisioning mechanism", stage:3,
-  job:"Turns an award recorded in IDDS into real objects on a resource. It is three cooperating pieces: a service on idds-prod that hands out work, a client script on each resource that polls for its own work over SSH, and a per-resource plugin that actually performs the action locally.",
-  not:"It decides nothing. It is a pipe: IDDS mints every identifier and holds every decision; acctd carries them outward. It is also not event-driven — it is a batch job on a timer, which is the origin of most 'approved but not working yet' questions.",
-  meta:"Six verbs: activate and inactivate at project, account and user level · plugins are per-resource",
-  tags:[["Automated","auto"],["Batch, not instant","note"]]},
-
- {id:"syncscript", name:"Savannah sync script", full:"IDDS → LDAP identity sync", stage:3,
-  job:"The second writer into NCSA LDAP. It copies a person's primary identity attributes — email, UID — from IDDS into the main branch of the directory.",
-  not:"It is not acctd and does not carry allocations. Keeping these two apart is the single most useful distinction on this page: one writes who you are, the other writes what you may use.",
-  meta:"Runs on Savannah · Savannah also syncs campus AD into LDAP daily",
-  tags:[["Automated","auto"]]},
-
- {id:"ldap", name:"NCSA LDAP", full:"the directory, 389 Directory Server", stage:4,
-  job:"The thing every service reads at login. It holds accounts in a main branch, and a separate branch per integrated resource holding that resource's allocation state. Group membership is the authorisation model: a new account has no access to anything until it is added to a group.",
-  not:"It is not a mirror of IDDS. The two use different state vocabularies — the directory has five lifecycle states where IDDS documents two or three — and no mapping between them is written down. The per-resource branches duplicate data on purpose and have no named owner.",
-  meta:"~38,650 accounts in the main branch · 9 resource branches · readable without authentication from inside NCSA",
-  tags:[["Entitlement of record","note"],["No named owner","none"]]},
-
- {id:"chargegroup", name:"Charge group", full:"the unit of authorisation", stage:4,
-  job:"An LDAP group, one per project allocation, created and maintained only by acctd. Being in the charge group is what grants a person access to a resource. There is no other grant path in the model.",
-  not:"It is not the only kind of group in the directory. Different tools own different prefixes — org_ follows the org chart, prj_ and grp_ are managed by PIs and group owners, delta_ and taiga_ are mirrored in by another script. Four-plus writers, one directory, no stated precedence.",
-  meta:"~3,865 charge groups · identified by businessCategory",
-  tags:[["Automated","auto"]]},
-
- {id:"kerberos", name:"Kerberos", full:"the NCSA authentication service", stage:0,
-  job:"Holds the password and proves who you are when you log in. The other half of an NCSA identity record.",
-  not:"It holds no attributes and no permissions. LDAP says what you are allowed to do; Kerberos only says that you are you.",
-  meta:"Paired with NCSA Duo on interactive systems",
-  tags:[]},
-
- {id:"identityportal", name:"identity.ncsa.illinois.edu", full:"the NCSA identity portal", stage:0,
-  job:"Where a person creates or manages their own NCSA identity — password, SSH keys, profile. Account creation, resets and deletions travel from here through a message queue to Kerberos.",
-  not:"It is a surface, not an authority. It writes into systems above it; it decides nothing. The Organization field on it is free text a user can type anything into, which is why organisation data in the directory is inconsistent.",
-  meta:"Legacy message-queue plumbing is slated for retirement",
-  tags:[["Surface, not authority","note"]]},
-
- {id:"groups", name:"NCSA Group Management", full:"internal.ncsa.illinois.edu/mis/groups", stage:4,
-  job:"Where a PI adds and removes members of their own project. The change is written to the allocations database and acctd picks it up on its next cycle.",
-  not:"The lag a PI sees is acctd's timer, not the tool being slow. Also: removing someone from a group is almost entirely the group owner's manual responsibility, audited by self-attestation once a year.",
-  meta:"Owner and maintainer roles · propagation lag of up to about an hour",
-  tags:[["Manual step","manual"]]},
-
- {id:"slurm", name:"Slurm", full:"the batch scheduler", stage:5,
-  job:"Enforcement on the compute systems. Each project gets a Slurm account, a matching quality-of-service setting and a budget; jobs that would exceed the balance are refused at submission. Slurm is also the authority on how much was actually used.",
-  not:"Refunds cannot be executed inside Slurm — the scheduler will not let a used balance be set back down, so a human adds the time back in instead. Cost is also not the sum of what you asked for: the largest single component of CPU, memory or GPU sets the charge.",
-  meta:"Budget carried as GrpTRESMins · per-partition billing weights",
-  tags:[["Automated","auto"],["Refunds are manual","manual"]]},
-
- {id:"usage", name:"The usage chain", full:"parselogs → send-jobs → jobd → IDDS", stage:6,
-  job:"Runs the opposite direction from everything else: completed jobs are read out of Slurm on the cluster, shipped back to the allocations database, and from there reported onward to ACCESS.",
-  not:"It is not part of acctd, despite the shared name and log channel. It is also notably more resilient — it can reach back and recover up to two weeks of missed reports after an outage, which the provisioning path cannot.",
-  meta:"Slurm-only · systems not running Slurm fall outside it",
-  tags:[["Automated","auto"]]},
-
- {id:"naps", name:"NAPS", full:"the allocations management UI", stage:2,
-  job:"A reporting and management interface over the allocations database. Some actions that have no automation live here — Radiant project inactivation is performed in NAPS by a person.",
-  not:"It is not the researcher-facing portal. It is an internal tool.",
-  meta:"Organises resources into seven domains",
-  tags:[["Manual step","manual"]]},
-
- {id:"invoice", name:"Invoice Tool", full:"Savannah billing application", stage:6,
-  job:"Where cost-recovery billing is assembled and pushed through the campus finance system for resources that charge.",
-  not:"Nothing feeds usage into it automatically. Each cycle, someone types the quantity into each customer assignment by hand — there is no documented automated link from the allocations database, the usage chain or the storage quota service into billing.",
-  meta:"Savannah's third access-adjacent role, alongside the AD sync and the Covered Entity Manager",
-  tags:[["Manual step","manual"]]},
-
- {id:"cilogon", name:"CILogon", full:"federated login broker", stage:0,
-  job:"Lets a web service accept a login from somewhere else — a campus identity provider, for instance. Delta's web interface and ICRN both use it.",
-  not:"It is not one product. The name covers three different things: a legacy certificate service, an identity proxy, and COmanage, a registry for managing people and their multiple institutional identities. NCSA treats it operationally as an external vendor.",
-  meta:"COmanage is the component that models one person holding several identities",
-  tags:[["External","note"]]},
-
- {id:"campusad", name:"Campus Active Directory", full:"ad.uillinois.edu", stage:0,
-  job:"The University's own directory. NCSA syncs it into NCSA LDAP daily, which is how campus-wide groups become usable here — and campus AD groups can directly govern access to some NCSA storage.",
-  not:"It is not NCSA LDAP and does not share its lifecycle. Its upstream is campus HR, which is why a new employee can appear in one before the other.",
-  meta:"Synced by PHP scripts on Savannah",
-  tags:[["Automated","auto"]]},
-
- {id:"cem", name:"Covered Entity Manager", full:"Savannah application", stage:4,
-  job:"The system of record for who may access Nightingale and the health-data enclave around it. Membership here is a required gate that no other NCSA resource has.",
-  not:"It is not LDAP and not the allocations database. It is a separate authorisation list for a regulated environment.",
-  meta:"Covers the ACHE enclave",
-  tags:[["Manual step","manual"]]},
-
- {id:"storagequota", name:"storagequota.ncsa.illinois.edu", full:"storage usage reporting", stage:6,
-  job:"A central service showing capacity and file-count usage against soft and hard limits for the research storage systems.",
-  not:"It reports; it does not enforce the allocation, and it does not feed billing.",
-  meta:"Covers Taiga and Granite",
-  tags:[]},
-
- {id:"investorportal", name:"Campus Cluster investor portal", full:"campuscluster.illinois.edu", stage:4,
-  job:"Where group membership for the Illinois Campus Cluster is managed, by the PI or a technical representative. It is the Campus Cluster's equivalent of NCSA group management.",
-  not:"It is not connected to acctd or to NCSA LDAP groups. Campus Cluster access is governed in a different identity domain with its own tooling.",
-  meta:"Also the management point for Taiga space attached to a Campus Cluster allocation",
-  tags:[["Manual step","manual"]]},
-
- {id:"globus", name:"Globus", full:"data transfer service", stage:0,
-  job:"Moves data in and out. It does its own identity linking, so a researcher may connect campus, NCSA and ACCESS identities inside Globus even though nothing else at NCSA connects them.",
-  not:"That linkage lives in Globus and is not readable by NCSA's own systems.",
-  meta:"High Assurance variant used for regulated data egress",
-  tags:[["External","note"]]}
+const KEYFACTS=[
+ ["It runs on a timer, not an event","Nothing fires the moment you're approved.",
+  "Provisioning jobs wake on a schedule and ask what's new. Minutes to hours, not seconds. This is the single most common cause of “approved but I can't log in.”"],
+ ["Three things carry the weight","IDDS records it, acctd delivers it, LDAP publishes it.",
+  "Follow almost any access question at NCSA by asking which of those three it's stuck in, and in what order they run."],
+ ["Two writers, one directory","A sync script writes who you are; acctd writes what you may use.",
+  "They don't coordinate, and the per-resource branches acctd writes have no named owner."],
+ ["Automation is the exception","Only Delta and Hydro go from approval to working project untouched.",
+  "Radiant, Taiga, Granite, Nightingale and the Campus Cluster each need a person to do something."]
 ];
 
-const SYSTEMS = [
-{
- id:"delta-access", label:"Delta · via ACCESS",
- title:"Delta, allocated through ACCESS",
- blurb:"The most automated path at NCSA, and the one the rest of the picture is usually drawn from. About 90% of Delta is allocated this way.",
- facts:[
-   ["Identity domain","NCSA identity"],
-   ["Logging in","SSH with Kerberos password + NCSA Duo, or the web interface via CILogon"],
-   ["Enforcement","Slurm refuses jobs over the balance"],
-   ["Human steps","None, once the researcher has an NCSA account"],
-   ["Expiry","Automated notices; project marked inactive when no valid allocation remains"],
-   ["Grace","30 days, data management only"]
- ],
+const PIECES=[
+ ["XRAS",1,"Where allocation requests are submitted and approved.",
+  "Set up in XRAS doesn't mean wired up. For some resources it only records the request and reports on it — approving there triggers nothing.","NCSA builds it for ACCESS and runs its own instance"],
+ ["AMIE",1,"Carries ACCESS awards into NCSA automatically.",
+  "Not fire-and-forget. If you have no NCSA account yet the award waits, and staff email you to go make one.","Two directions: awards in, usage out"],
+ ["Illinois Computes form",1,"Front door for Illinois Computes requests.",
+  "Not connected to the allocations database. Staff read the ticket and enter it into XRAS by hand.","~1,300 requests since 2023"],
+ ["Jira / SUP",1,"The support queue.",
+  "For several resources a ticket isn't a complaint — it's a required step, the way a human gets asked to create something.","~12,200 tickets/yr; ~10% about access or logins"],
+ ["IDDS",2,"The database of what was awarded. Also mints your UID and GIDs.",
+  "Not an identity system. It also has no table called projects — a project is a charge number, and status belongs to a project-plus-resource pair, which is why “turn this off on just one machine” has no button.","PostgreSQL on idds-prod"],
+ ["acctd",3,"Delivers an award onto a resource: accounts, groups, budgets.",
+  "Decides nothing — it's a pipe. And it's a batch job, which is why access appears a while after approval.","Service + per-resource plugin, six verbs"],
+ ["Savannah sync script",3,"Copies your name, email and UID from IDDS into the directory.",
+  "Not acctd. This one writes who you are; acctd writes what you may use. Keeping those apart explains most of the rest.","Savannah also syncs campus AD in daily"],
+ ["NCSA LDAP",4,"The directory every service reads when you log in.",
+  "Not a mirror of IDDS — the two use different status vocabularies with no documented mapping. Its per-resource branches duplicate data deliberately and have no named owner.","~38,650 accounts, 9 resource branches"],
+ ["Charge group",4,"The group membership that grants access to a resource.",
+  "Not the only kind of group. Four-plus tools write different prefixes into the same directory with no stated precedence.","~3,865 of them; written only by acctd"],
+ ["Kerberos",0,"Holds your password.",
+  "Holds no permissions and no attributes. It proves you're you; LDAP says what you may do.","Paired with NCSA Duo"],
+ ["identity.ncsa.illinois.edu",0,"Where you manage your NCSA identity and password.",
+  "A surface, not an authority — it writes into systems above it and decides nothing. Its Organization field is free text, which is why organisation data is inconsistent.","Account changes travel via a legacy message queue"],
+ ["NCSA Group Management",4,"Where a PI adds and removes project members.",
+  "The delay you see is acctd's timer, not the tool. Removing people is almost entirely the group owner's job, self-audited once a year.","Owner and maintainer roles"],
+ ["Slurm",5,"Enforces the budget and records what you used.",
+  "Refunds can't run inside Slurm — a person adds the time back instead. And cost isn't the sum of what you asked for: the largest of CPU, memory or GPU sets the charge.","Budget held as GrpTRESMins"],
+ ["The usage chain",6,"Sends finished-job records back to the allocations database.",
+  "Not part of acctd, despite the shared name. It's also more resilient — it can recover two weeks of missed reports after an outage, which provisioning cannot.","Slurm only"],
+ ["NAPS",2,"Internal interface over the allocations database.",
+  "Where some un-automated actions actually happen — Radiant project inactivation is done here by hand.","Groups resources into seven domains"],
+ ["Invoice Tool",6,"Assembles cost-recovery billing.",
+  "Nothing feeds usage into it. Each cycle someone types the quantities in by hand.","A Savannah application"],
+ ["CILogon",0,"Lets a web service accept a login from somewhere else.",
+  "Three different products share the name: a certificate service, an identity proxy, and COmanage, a registry for people with several institutional identities.","Treated operationally as external"],
+ ["Campus Active Directory",0,"The University's directory, synced in daily.",
+  "Not NCSA LDAP — but its groups can directly govern NCSA research storage, which surprises people.","Upstream is campus HR"],
+ ["Covered Entity Manager",4,"The access list for Nightingale's health-data enclave.",
+  "Separate from LDAP and from the allocations database. No other NCSA resource has an equivalent.","A Savannah application"],
+ ["storagequota.ncsa.illinois.edu",6,"Shows storage usage against your limits.",
+  "Reports only. It doesn't enforce the allocation and it doesn't feed billing.","Taiga and Granite"],
+ ["Campus Cluster investor portal",4,"Group management for the Illinois Campus Cluster.",
+  "Not connected to acctd or NCSA LDAP. The Campus Cluster is governed in a different identity domain.","Also manages attached Taiga space"],
+ ["Globus",0,"Moves data. Links your identities internally.",
+  "That link lives inside Globus. NCSA's own systems can't read it.","High Assurance variant for regulated data"]
+];
+
+const STAGE={0:"Identity",1:"Request",2:"Record",3:"Provision",4:"Entitlement",5:"Enforcement",6:"Usage"};
+
+const SYS=[
+{id:"delta-access",label:"Delta · ACCESS",
+ facts:[["Identity","NCSA"],["Login","Kerberos + NCSA Duo"],["Over budget","Jobs refused"],["Human steps","None"],["Expiry","Automatic notices"]],
  steps:[
-  {stage:1, comp:"ACCESS XRAS", mode:"auto", h:"The request is reviewed nationally",
-   p:"A researcher submits to ACCESS and a national review panel decides. NCSA is not in this decision."},
-  {stage:1, comp:"AMIE", mode:"auto", h:"The award is carried to NCSA",
-   p:"An allocation packet arrives over AMIE and a local project is created without anyone retyping it.",
-   flag:"If the named person has no NCSA account yet, the packet waits here and staff email the PI. Nothing further for that person processes until the account exists."},
-  {stage:2, comp:"IDDS", mode:"auto", h:"The award becomes the record",
-   p:"The project, the resource, the amount and the people are written into the allocations database, which also generates the UID and GIDs."},
-  {stage:3, comp:"acctd", mode:"auto", h:"Provisioning runs on a timer",
-   p:"acctd notices the new allocation on its next cycle and dispatches work to Delta's own plugin.",
-   flag:"This is a scheduled batch job, not an instant reaction. Expect minutes to hours, not seconds."},
-  {stage:3, comp:"Delta plugin (Slurm)", mode:"auto", h:"Real objects are created on the machine",
-   p:"The plugin creates the Slurm accounts, a matching quality-of-service entry, the time budget, and the user associations."},
-  {stage:4, comp:"NCSA LDAP · charge group", mode:"auto", h:"The entitlement is written down",
-   p:"A charge group for the project is created in the directory and the people are added to it. Being in that group is what access means."},
-  {stage:4, comp:"ACCESS user portal", mode:"manual", h:"The PI manages members",
-   p:"For ACCESS-awarded projects, adding and removing people happens in the ACCESS portal rather than NCSA's group tool."},
-  {stage:5, comp:"SSH · Slurm", mode:"auto", h:"The resource decides at use",
-   p:"Three separate checks: Kerberos and Duo prove identity, LDAP group membership says what may be used, and Slurm refuses a job that would exceed the budget."},
-  {stage:6, comp:"usage chain", mode:"auto", h:"Usage is reported back",
-   p:"Finished jobs are read from Slurm, shipped to the allocations database and reported onward to ACCESS."}
- ],
- notes:[
-  {k:"note", t:"Why this one is different",
-   d:"Delta and Hydro are the only NCSA systems where an approval results in a working project with no manual communication. Every path on the other tabs has at least one human step."},
-  {k:"note", t:"Eligibility is enforced upstream now",
-   d:"ACCESS requires a known eligible organisation and a matching organisational email, and is terminating non-compliant accounts. When ACCESS deactivates an identity, the NCSA identity and any local award persist — there is no documented rule for what happens locally in that case."}
- ]
-},
-{
- id:"delta-ic", label:"Delta · via Illinois Computes",
- title:"Delta, allocated through Illinois Computes",
- blurb:"The same machine, reached through NCSA's own allocation programme. The technical half is identical; the request half and the end-of-life half are not.",
- facts:[
-   ["Identity domain","NCSA identity"],
-   ["Logging in","SSH with Kerberos password + NCSA Duo, or the web interface via CILogon"],
-   ["Enforcement","Slurm refuses jobs over the balance"],
-   ["Human steps","Request intake and triage"],
-   ["Expiry","No automated notices — handled by hand as needed"],
-   ["Grace","30 days, data management only"]
- ],
+  [1,"ACCESS XRAS","auto","Reviewed nationally","A national panel decides. NCSA isn't in this call."],
+  [1,"AMIE","auto","The award reaches NCSA","Automatic — unless you have no NCSA account yet. Then it waits, and staff email you to create one."],
+  [2,"IDDS","auto","Written to the allocations database","Project, amount, people. Your UID and GIDs come from here."],
+  [3,"acctd","auto","Provisioning wakes on its timer","Minutes to hours after approval. Not seconds."],
+  [3,"Delta plugin","auto","Slurm account and budget created","Account, quality-of-service entry, time budget, user associations."],
+  [4,"Charge group","auto","You're added to the group","That membership is what access actually is."],
+  [4,"ACCESS portal","manual","The PI manages members there","ACCESS-awarded projects use the ACCESS portal, not NCSA's group tool."],
+  [5,"SSH + Slurm","auto","Three checks when you use it","Duo proves you, the group permits you, Slurm checks the balance."],
+  [6,"Usage chain","auto","Usage reported back","To NCSA, and onward to ACCESS."]],
+ note:["auto","The one fully automatic path","Delta and Hydro are the only NCSA systems where approval becomes a working project with no human in the loop."]},
+
+{id:"delta-ic",label:"Delta · Illinois Computes",
+ facts:[["Identity","NCSA"],["Login","Kerberos + NCSA Duo"],["Over budget","Jobs refused"],["Human steps","Intake and triage"],["Expiry","No automatic notices"]],
  steps:[
-  {stage:1, comp:"Illinois Computes form", mode:"manual", h:"The request arrives as a form",
-   p:"A researcher submits at request.computes.illinois.edu. The submission becomes a support ticket."},
-  {stage:1, comp:"Jira · SUP", mode:"manual", h:"Staff triage it",
-   p:"Facilitation staff review the request and, if it is approved, enter it into the NCSA XRAS instance."},
-  {stage:1, comp:"NCSA XRAS", mode:"manual", h:"The award is recorded and approved",
-   p:"The request is approved in NCSA's own XRAS instance rather than the national one."},
-  {stage:2, comp:"IDDS", mode:"auto", h:"The award becomes the record",
-   p:"From here onward the path is the same as the ACCESS lane: the allocations database holds what was awarded."},
-  {stage:3, comp:"acctd", mode:"auto", h:"Provisioning runs on a timer",
-   p:"acctd dispatches work to Delta's plugin on its next cycle."},
-  {stage:3, comp:"Delta plugin (Slurm)", mode:"auto", h:"Real objects are created on the machine",
-   p:"Slurm accounts, quality-of-service entry, budget and user associations, exactly as in the ACCESS lane."},
-  {stage:4, comp:"NCSA LDAP · charge group", mode:"auto", h:"The entitlement is written down",
-   p:"A charge group is created and the people are added to it."},
-  {stage:4, comp:"NCSA Group Management", mode:"manual", h:"The PI manages members",
-   p:"Non-ACCESS projects use NCSA's own group tool. A change written there is picked up by acctd on its next cycle."},
-  {stage:5, comp:"SSH · Slurm", mode:"auto", h:"The resource decides at use",
-   p:"Identical to the ACCESS lane."},
-  {stage:6, comp:"usage chain", mode:"auto", h:"Usage is reported back",
-   p:"Reported into the allocations database. Onward reporting to ACCESS does not apply to this lane."}
- ],
- notes:[
-  {k:"none", t:"No automated expiry notices on this lane",
-   d:"ACCESS-awarded Delta projects get periodic expiration notices automatically and are marked for inactivation when they hold no valid allocation. Illinois-awarded projects on the same machine get none — notifications are sent manually as needed, and a notification and inactivation process is being built. This gap applies generally to NCSA-awarded projects, not only on Delta."},
-  {k:"note", t:"There is a third door onto the same machine",
-   d:"Delta Discretionary is a separate XRAS submission type for work the requester must justify as unsuitable for ACCESS. Consulting and staff-time allocations are also tracked in XRAS but never flow into provisioning at all."}
- ]
-},
-{
- id:"deltaai", label:"DeltaAI",
- title:"DeltaAI",
- blurb:"Delta's GPU-focused sibling. Architecturally very close, but it is not in the fully-automatic club: documented manual steps remain.",
- facts:[
-   ["Identity domain","NCSA identity"],
-   ["Logging in","SSH with Kerberos password + NCSA Duo"],
-   ["Enforcement","Slurm refuses jobs over the balance"],
-   ["Human steps","At least one documented manual step in provisioning"],
-   ["Expiry","Follows the lane: automated on ACCESS, manual on Illinois awards"],
-   ["Directory branch","No dedicated resource branch observed in LDAP"]
- ],
+  [1,"IC form","manual","You submit a form","It becomes a support ticket."],
+  [1,"Jira + XRAS","manual","Staff triage and enter it","Facilitation staff review, then record the award in NCSA's XRAS instance."],
+  [2,"IDDS","auto","Written to the allocations database","From here on, identical to the ACCESS lane."],
+  [3,"acctd","auto","Provisioning wakes on its timer","Same batch job, same delay."],
+  [3,"Delta plugin","auto","Slurm account and budget created","Same objects as the ACCESS lane."],
+  [4,"Charge group","auto","You're added to the group","Same mechanism."],
+  [4,"NCSA Group Management","manual","The PI manages members here","Non-ACCESS projects use NCSA's own tool. Changes are picked up on acctd's next cycle."],
+  [5,"SSH + Slurm","auto","Three checks when you use it","Identical to the ACCESS lane."],
+  [6,"Usage chain","auto","Usage reported back","To NCSA only."]],
+ note:["none","Expiry works differently on this lane","ACCESS projects get automatic expiration notices and are marked inactive when no allocation remains. Illinois-awarded projects on the same machine get none — notices are sent by hand. This applies to NCSA-awarded projects generally."]},
+
+{id:"deltaai",label:"DeltaAI",
+ facts:[["Identity","NCSA"],["Login","Kerberos + NCSA Duo"],["Over budget","Jobs refused"],["Human steps","At least one"],["Directory","No branch of its own"]],
  steps:[
-  {stage:1, comp:"XRAS · AMIE", mode:"auto", h:"Requested through the same front doors as Delta",
-   p:"ACCESS, NAIRR and Illinois Computes all allocate DeltaAI, through the same intake paths described on the Delta tabs."},
-  {stage:2, comp:"IDDS", mode:"auto", h:"The award becomes the record",
-   p:"Same allocations database, same identifiers."},
-  {stage:3, comp:"acctd + manual steps", mode:"manual", h:"Provisioning is not fully hands-off",
-   p:"Unlike Delta, DeltaAI is recorded as requiring documented manual steps to complete provisioning.",
-   flag:"Documented, not independently confirmed. Worth checking with the Delta project office before relying on it."},
-  {stage:4, comp:"NCSA LDAP", mode:"auto", h:"Entitlement in the directory",
-   p:"Group membership governs access as everywhere else. Note that the directory has no resource branch of its own for DeltaAI, which is a loose end rather than a known problem."},
-  {stage:5, comp:"SSH · Slurm", mode:"auto", h:"The resource decides at use",
-   p:"Same three checks as Delta."},
-  {stage:6, comp:"usage chain", mode:"auto", h:"Usage is reported back",
-   p:"Through the standard Slurm usage chain."}
- ],
- notes:[
-  {k:"note", t:"Treat DeltaAI as Delta-with-asterisks",
-   d:"Nearly everything on the Delta tabs applies. The asterisks are the manual provisioning steps and the absent directory branch; both are places where the general model and the specific machine have drifted apart."}
- ]
-},
-{
- id:"radiant", label:"Radiant",
- title:"Radiant",
- blurb:"NCSA's cost-recovery private cloud. The most instructive example of what happens when the automation exists but is not wired up: the same software runs, but a person starts it.",
- facts:[
-   ["Identity domain","NCSA identity"],
-   ["Logging in","NCSA credentials + NCSA Duo"],
-   ["Enforcement","Project membership; billing is by consumption"],
-   ["Human steps","Several — project code, running acctd, inactivation, billing"],
-   ["Expiry","No automated inactivation"],
-   ["Billing","Reconciled by hand"]
- ],
+  [1,"XRAS / AMIE","auto","Same front doors as Delta","ACCESS, NAIRR and Illinois Computes all allocate it."],
+  [2,"IDDS","auto","Written to the allocations database","Same database, same identifiers."],
+  [3,"acctd + a person","manual","Provisioning isn't hands-off","Documented manual steps remain. Documented, not confirmed — check with the Delta project office."],
+  [4,"NCSA LDAP","auto","Group membership governs access","DeltaAI has no resource branch of its own in the directory. A loose end, not a known fault."],
+  [5,"SSH + Slurm","auto","Three checks when you use it","As Delta."],
+  [6,"Usage chain","auto","Usage reported back","Standard Slurm chain."]],
+ note:["manual","Delta, with asterisks","Nearly everything on the Delta tabs applies. The asterisks are the manual steps and the missing directory branch."]},
+
+{id:"radiant",label:"Radiant",
+ facts:[["Identity","NCSA"],["Login","NCSA + NCSA Duo"],["Over budget","Billed by use"],["Human steps","Four"],["Expiry","Nothing ends it"]],
  steps:[
-  {stage:1, comp:"XRAS · direct investment", mode:"manual", h:"The request is approved",
-   p:"Radiant is requested through Illinois Computes or bought directly as an investment, and approved by a named approver."},
-  {stage:1, comp:"project code", mode:"manual", h:"A four-letter project code is issued by hand",
-   p:"Radiant projects need a short code that a person allocates and records. There is no generator."},
-  {stage:2, comp:"IDDS", mode:"auto", h:"The award becomes the record",
-   p:"Standard allocations database entry."},
-  {stage:3, comp:"acctd, run manually", mode:"manual", h:"Provisioning is started by a person",
-   p:"Radiant's acctd is run by hand rather than on a timer. A move to a scheduled job on its own service machine has been planned; status is unconfirmed.",
-   flag:"This is the clearest case on the site of a component existing without the automation around it."},
-  {stage:4, comp:"NCSA LDAP · radiant_ groups", mode:"auto", h:"Entitlement in the directory",
-   p:"Radiant has its own branch in the directory and its own group prefix."},
-  {stage:5, comp:"Radiant platform", mode:"auto", h:"The platform decides at use",
-   p:"Access to virtual machines and services is governed by project membership."},
-  {stage:5, comp:"inactivation", mode:"none", h:"Nothing ends the entitlement",
-   p:"There is no automated inactivation for Radiant. Allocation end dates are reported as not enforced — billing continues until someone asks for it to stop. Inactivating a project is done by hand in the management UI.",
-   flag:"Open work item. Treat 'Radiant access persists after the award ends' as the default, not the exception."},
-  {stage:6, comp:"Invoice Tool", mode:"manual", h:"Billing is assembled by hand",
-   p:"Radiant billing is reconciled manually between a spreadsheet and the finance application; usage quantities are typed into the invoicing tool each cycle."}
- ],
- notes:[
-  {k:"manual", t:"Why Radiant is worth understanding even if you never use it",
-   d:"Radiant shows which parts of the access chain are properties of the architecture and which are properties of how much effort has been spent on a given resource. Nothing about Radiant prevents automation; it simply has not been done."}
- ]
-},
-{
- id:"nightingale", label:"Nightingale · ACHE",
- title:"Nightingale and the health-data enclave",
- blurb:"The regulated environment. It adds gates that exist nowhere else at NCSA — the extra layers are the point, not an accident.",
- facts:[
-   ["Identity domain","NCSA identity"],
-   ["Logging in","VPN, then a hop through a bastion host"],
-   ["Enforcement","Enclave membership plus session limits"],
-   ["Human steps","Many, by design — approvals and training are gates"],
-   ["Session limits","12 hours idle, 24 hours absolute"],
-   ["Data egress","Globus High Assurance only"]
- ],
+  [1,"XRAS / investment","manual","Approved by a named person","Via Illinois Computes or bought directly."],
+  [1,"Project code","manual","A four-letter code is issued by hand","There's no generator. Someone allocates and records it."],
+  [2,"IDDS","auto","Written to the allocations database","Standard entry."],
+  [3,"acctd, run by hand","manual","Someone starts provisioning","Radiant's acctd isn't on a timer. A scheduled version has been planned; status unconfirmed."],
+  [4,"radiant_ groups","auto","Group membership governs access","Radiant has its own directory branch and prefix."],
+  [5,"Radiant platform","auto","Project membership at use","Governs access to VMs and services."],
+  [5,"Inactivation","none","Nothing ends the entitlement","No automated inactivation. End dates are reported as unenforced — billing continues until someone asks it to stop."],
+  [6,"Invoice Tool","manual","Billing is reconciled by hand","Between a spreadsheet and the finance application."]],
+ note:["manual","Why Radiant is instructive","Nothing about Radiant prevents automation. It just hasn't been done — which separates what's architectural from what's a question of effort."]},
+
+{id:"nightingale",label:"Nightingale · ACHE",
+ facts:[["Identity","NCSA"],["Login","VPN then bastion"],["Session","12h idle / 24h max"],["Human steps","Many, by design"],["Data out","Globus High Assurance"]],
  steps:[
-  {stage:1, comp:"coordinator invite", mode:"manual", h:"You are invited, not self-served",
-   p:"Access starts with an invitation link from a project coordinator. Requests are routed according to the data classification involved."},
-  {stage:1, comp:"UIN · training", mode:"manual", h:"Eligibility is established off-system",
-   p:"A University identification number, completed HIPAA training and an encrypted endpoint are all prerequisites before any account work happens."},
-  {stage:1, comp:"approvals", mode:"manual", h:"Two separate approvals",
-   p:"Both a manager and a HIPAA liaison must approve. These are policy gates, not technical ones."},
-  {stage:2, comp:"Covered Entity Manager", mode:"manual", h:"Membership is recorded in its own system",
-   p:"The Covered Entity Manager, an application on Savannah, is the system of record for who is inside the enclave. No other NCSA resource has an equivalent."},
-  {stage:3, comp:"account provisioning", mode:"manual", h:"The account is set up",
-   p:"NCSA identity, Duo enrolment and the relevant group memberships are established."},
-  {stage:4, comp:"NCSA LDAP · ache_ groups", mode:"auto", h:"Entitlement in the directory",
-   p:"The enclave has its own group prefix in the directory."},
-  {stage:5, comp:"VPN · bastion · session limits", mode:"auto", h:"Enforcement is layered",
-   p:"Reaching the system requires the VPN and then a hop through a dedicated bastion host. Sessions are capped at 12 hours idle and 24 hours absolute."},
-  {stage:5, comp:"Globus High Assurance", mode:"auto", h:"Getting data out is controlled too",
-   p:"Egress runs through the High Assurance variant of Globus rather than ordinary transfer."}
- ],
- notes:[
-  {k:"note", t:"The gates are the product",
-   d:"Every manual step here is doing work that the regulatory environment requires. Counting manual steps as defects is the wrong lens for this system — but it is still useful to know that enclave membership lives in a different place from every other entitlement at NCSA."},
-  {k:"note", t:"Records are never deleted",
-   d:"Accounting and user profile data in the enclave databases are retained indefinitely. This is consistent with how user records are treated across NCSA, where accounts are soft-retained rather than removed after the last project ends."}
- ]
-},
-{
- id:"iccp", label:"Illinois Campus Cluster",
- title:"Illinois Campus Cluster (ICCP)",
- blurb:"The most important exception on this site: a major system that is not in the NCSA identity domain and not on NCSA's provisioning machinery at all.",
- facts:[
-   ["Identity domain","UIUC campus — NetID"],
-   ["Logging in","NetID password + Illinois Duo"],
-   ["Enforcement","Over-allocation demotes you, it does not block you"],
-   ["Provisioning","Not on acctd"],
-   ["XRAS","Request capture and reporting only"],
-   ["Group management","Campus Cluster investor portal"]
- ],
+  [1,"Coordinator invite","manual","You're invited, not self-served","Access starts with an invitation link. Routing depends on the data classification."],
+  [1,"UIN + training","manual","Eligibility is established first","University ID number, HIPAA training and an encrypted laptop, before any account work."],
+  [1,"Two approvals","manual","Manager and HIPAA liaison","Policy gates, not technical ones."],
+  [2,"Covered Entity Manager","manual","Membership recorded separately","Its own system of record. No other NCSA resource has one."],
+  [3,"Account setup","manual","Identity, Duo and groups","Done by hand."],
+  [4,"ache_ groups","auto","Group membership governs access","Its own prefix in the directory."],
+  [5,"VPN + bastion","auto","Layered enforcement","VPN, then a hop through a dedicated bastion. Sessions capped."],
+  [5,"Globus High Assurance","auto","Getting data out is controlled too","Not ordinary transfer."]],
+ note:["manual","The gates are the point","Every manual step here is doing work the regulations require. Counting them as defects is the wrong lens — though it's still worth knowing enclave membership lives somewhere no other entitlement does."]},
+
+{id:"iccp",label:"Campus Cluster",
+ facts:[["Identity","UIUC NetID"],["Login","NetID + Illinois Duo"],["Over budget","Demoted, not blocked"],["acctd","Not on it"],["XRAS","Records only"]],
  steps:[
-  {stage:1, comp:"several front doors", mode:"manual", h:"Five documented request paths",
-   p:"The Campus Cluster is requested through its own forms, through Illinois Computes, through a teaching-access form, or as an investor purchase."},
-  {stage:1, comp:"XRAS", mode:"manual", h:"XRAS captures and reports, and stops there",
-   p:"For requests that do arrive via XRAS, approving them triggers nothing downstream. The record sits alongside other allocations for reporting purposes.",
-   flag:"This is the clearest example of why 'configured in XRAS' does not mean 'integrated with XRAS'."},
-  {stage:3, comp:"a person", mode:"manual", h:"A human creates the group",
-   p:"Someone creates the user group in the Campus Cluster's own investor portal. This is the provisioning step."},
-  {stage:4, comp:"investor portal", mode:"manual", h:"Membership is managed there",
-   p:"The PI or a technical representative manages members in the portal, not in NCSA group management and not in NCSA LDAP."},
-  {stage:5, comp:"NetID · Illinois Duo · Slurm", mode:"auto", h:"Campus credentials at the door",
-   p:"Login uses the campus identity domain with its own separate Duo enrolment."},
-  {stage:5, comp:"queue demotion", mode:"auto", h:"Running out works differently here",
-   p:"Exceeding an allocation does not block jobs. The researcher is demoted to a deprioritised queue and can continue on free cycles.",
-   flag:"Worth knowing when comparing systems: 'out of time' means something different on Delta than it does here."}
- ],
- notes:[
-  {k:"none", t:"Not on acctd",
-   d:"Whether ICCP should be brought onto NCSA's provisioning machinery is an open question with a ticket against it. Today it is not, which is why almost nothing on the Delta tabs transfers here."},
-  {k:"note", t:"Illinois Computes is itself an investor",
-   d:"Illinois Computes holds its own partition on the Campus Cluster on the same footing as any department investor, which is how an Illinois Computes award can land a researcher on a system NCSA does not provision."}
- ]
-},
-{
- id:"taiga", label:"Taiga",
- title:"Taiga",
- blurb:"Centre-wide research storage, and the system with the most front doors: four different ways of being authorised onto the same filesystem, depending on where the allocation came from.",
- facts:[
-   ["Identity domain","NCSA identity — or campus AD, depending on the door"],
-   ["Authorisation","Group membership, in one of four different group systems"],
-   ["Enforcement","Filesystem permissions and quota"],
-   ["Human steps","A support ticket is part of the path"],
-   ["Usage","Reported by the central storage quota service"],
-   ["Paths","Directory layout encodes the funding source"]
- ],
+  [1,"Several front doors","manual","Five documented request paths","Its own forms, Illinois Computes, a teaching form, or an investor purchase."],
+  [1,"XRAS","manual","XRAS records it and stops","Approving there triggers nothing downstream. The clearest case of configured-but-not-integrated."],
+  [3,"A person","manual","Someone creates the group","In the Campus Cluster's own portal. This is the provisioning step."],
+  [4,"Investor portal","manual","Membership managed there","Not NCSA group management, not NCSA LDAP."],
+  [5,"NetID + Illinois Duo","auto","Campus credentials at the door","A different identity domain with its own Duo enrolment."],
+  [5,"Queue demotion","auto","Running out works differently","You aren't blocked. You drop to a deprioritised queue and keep running on free cycles."]],
+ note:["none","Almost nothing transfers from Delta","Different identity domain, different tooling, not on NCSA's provisioning machinery. Whether it should be is an open question with a ticket against it."]},
+
+{id:"taiga",label:"Taiga",
+ facts:[["Identity","NCSA or campus AD"],["Authorisation","Four different systems"],["Enforcement","Permissions + quota"],["Human steps","A ticket"],["Usage","storagequota"]],
  steps:[
-  {stage:1, comp:"four different intakes", mode:"manual", h:"How you got here determines everything after",
-   p:"Taiga is reached by direct investment, by an allocation on a compute system that includes project space, through a Campus Cluster allocation, or attached to a Radiant project. These are genuinely different paths, not variations."},
-  {stage:1, comp:"Jira · SUP", mode:"manual", h:"A support ticket is a required step",
-   p:"Provisioning Taiga space involves a support ticket and, on some paths, creating a Campus Cluster group as well."},
-  {stage:2, comp:"IDDS", mode:"auto", h:"Recorded where applicable",
-   p:"Allocation-driven paths are recorded in the allocations database like any other award."},
-  {stage:4, comp:"whichever group system applies", mode:"manual", h:"Four different authorisation front doors",
-   p:"Direct investment uses an NCSA LDAP group or a campus AD group managed by the PI. A Campus Cluster allocation is managed in the investor portal. Compute project space uses the compute allocation's own group. Radiant-attached space uses a dedicated group that only support staff can add maintainers to.",
-   flag:"Campus AD groups can therefore directly govern NCSA research storage — a fact that surprises people who assume NCSA LDAP is the only authorisation substrate."},
-  {stage:5, comp:"filesystem", mode:"auto", h:"Permissions and quota at use",
-   p:"Ordinary filesystem permissions, with soft and hard quotas on both capacity and file count."},
-  {stage:6, comp:"storagequota service", mode:"auto", h:"Usage is visible centrally",
-   p:"The central storage quota service reports usage against both limits."}
- ],
- notes:[
-  {k:"note", t:"The directory layout is an accidental data model",
-   d:"Top-level paths encode the funding source — NSF, Illinois, industry. Nothing depends on this by design, but it is load-bearing in practice for anyone reasoning about what is where."},
-  {k:"note", t:"Extra services are ticket-only",
-   d:"S3 gateway access and NFS exports on Taiga are provisioned only by support request. There is no self-service for either."}
- ]
-},
-{
- id:"granite", label:"Granite",
- title:"Granite",
- blurb:"Tape-backed archive storage. The simplest path on the site, and a good illustration of how informal an intake can be.",
- facts:[
-   ["Identity domain","NCSA identity"],
-   ["Authorisation","Group membership"],
-   ["Enforcement","Filesystem permissions and quota"],
-   ["Intake","Email to a named individual"],
-   ["Usage","Reported by the central storage quota service"],
-   ["Quota note","File-count limits scale with capacity"]
- ],
+  [1,"Four intakes","manual","How you got here decides everything","Direct investment, project space on a compute award, a Campus Cluster allocation, or attached to Radiant. Genuinely different paths."],
+  [1,"Jira · SUP","manual","A ticket is part of the path","Plus creating a Campus Cluster group on some paths."],
+  [2,"IDDS","auto","Recorded where applicable","Allocation-driven paths only."],
+  [4,"Four front doors","manual","Four different group systems","An NCSA LDAP group, a campus AD group, the investor portal, or a support-managed group — depending which intake you came through. Campus AD groups really can govern NCSA storage."],
+  [5,"Filesystem","auto","Permissions and quota","Soft and hard limits on both capacity and file count."],
+  [6,"storagequota","auto","Usage visible centrally","Against both limits."]],
+ note:["manual","The paths encode the funding","Top-level directories are split by funding source. Nothing depends on that by design, but people reason with it."]},
+
+{id:"granite",label:"Granite",
+ facts:[["Identity","NCSA"],["Authorisation","Group membership"],["Enforcement","Permissions + quota"],["Intake","Email"],["Usage","storagequota"]],
  steps:[
-  {stage:1, comp:"email", mode:"manual", h:"The request is an email",
-   p:"Direct-investment storage requests for Granite — and for Jade and Harbor — go by email to one named person's campus address, using a question template that collects project name, capacity, the account to bill, start date and contract details.",
-   flag:"No ticket is created at intake, so at that moment the system of record is an inbox. This is the thinnest point in any intake path described here."},
-  {stage:1, comp:"Illinois Computes", mode:"manual", h:"Or through the allocation programme",
-   p:"Granite can also be awarded through Illinois Computes, in which case the intake is the Illinois Computes form rather than email."},
-  {stage:2, comp:"IDDS", mode:"auto", h:"Recorded where applicable",
-   p:"Allocation-driven requests are recorded in the allocations database."},
-  {stage:3, comp:"provisioning", mode:"manual", h:"Space is created",
-   p:"Granite has its own branch in the directory and its own group prefix; the space and group are set up as part of fulfilling the request."},
-  {stage:4, comp:"NCSA LDAP · granite_ groups", mode:"auto", h:"Entitlement in the directory",
-   p:"Group membership governs access."},
-  {stage:5, comp:"filesystem", mode:"auto", h:"Permissions and quota at use",
-   p:"Capacity and file-count quotas apply, with file-count limits scaling per terabyte of capacity."},
-  {stage:6, comp:"storagequota service", mode:"auto", h:"Usage is visible centrally",
-   p:"Same central reporting service as Taiga."}
- ],
- notes:[
-  {k:"note", t:"Harbor is the odd one out",
-   d:"Harbor, the storage behind home and software directories on several clusters, has no allocation path at all. You get it implicitly by holding a compute allocation on a cluster that uses it, or by the same email request. That is why it does not appear on the by-resource allocation pages."}
- ]
+  [1,"Email","manual","The request is an email","Direct-investment storage requests go to one named person's inbox with a question template. No ticket is created, so at that moment the system of record is an inbox."],
+  [1,"Illinois Computes","manual","Or through the programme","In which case the intake is the IC form instead."],
+  [2,"IDDS","auto","Recorded where applicable","Allocation-driven requests only."],
+  [3,"Provisioning","manual","Space and group created","Granite has its own directory branch and prefix."],
+  [4,"granite_ groups","auto","Group membership governs access","As elsewhere."],
+  [5,"Filesystem","auto","Permissions and quota","File-count limits scale with capacity."],
+  [6,"storagequota","auto","Usage visible centrally","Same service as Taiga."]],
+ note:["none","Harbor is the odd one out","Harbor, behind home and software directories on several clusters, has no allocation path at all. You get it implicitly with a compute award, or by the same email."]}
+];
+
+const CREDS=[
+ ["NCSA identity","NCSA Duo","Delta, DeltaAI, Radiant, Nightingale, Hydro, Granite, Taiga"],
+ ["UIUC NetID","Illinois Duo","Campus Cluster, ICRN, campus services"],
+ ["Campus AD account","Illinois Duo","Campus services — and, via synced groups, some NCSA storage"],
+ ["ACCESS ID","ACCESS","The ACCESS portal and allocation requests. Not an NCSA login."],
+ ["Google Apps @ Illinois","Illinois Duo","Some request forms, including Illinois HTC"],
+ ["Globus identity","varies","Data transfer"]
+];
+
+const IDNOTES=[
+ ["They answer different questions","A NetID says you're at the University; an NCSA identity says NCSA's systems know you.",
+  "Neither implies the other. NCSA's standing policy is that resources default to NCSA identities only — linking an external one in needs CISO approval."],
+ ["Nothing reconciles them","No service can say this NetID and this ACCESS ID are the same person.",
+  "Staff accounts get a campus link at creation; that's the only automatic one. Everywhere else it's matched by hand on name and email, which is how duplicate accounts happen."],
+ ["Your identity lives in two places","LDAP holds the attributes. Kerberos holds the password.",
+  "Normal for Unix, but it means switching someone off isn't one operation."]
+];
+
+const GLOSS=[
+ ["ACCESS","The national programme that allocates US research computing. NCSA is a provider."],
+ ["ACHE","The regulated health-data enclave around Nightingale."],
+ ["acctd","Turns a recorded award into accounts, groups and budgets on a resource."],
+ ["AMIE","The channel carrying ACCESS awards to a resource provider."],
+ ["Charge group","The LDAP group that grants access. Written only by acctd."],
+ ["CILogon","A federated login broker. Also a certificate service and an identity registry."],
+ ["CiDeR","Where a resource is described so national systems know it exists."],
+ ["COmanage","The part of CILogon that models one person with several identities."],
+ ["Duo","Two-factor. NCSA Duo and Illinois Duo are separate enrolments."],
+ ["GID","The number a Unix system uses for a group. Generated by IDDS."],
+ ["GrpTRESMins","The Slurm setting holding a project's remaining budget."],
+ ["ICCP","Illinois Campus Cluster Program. Campus identity, not on acctd."],
+ ["ICRN","Illinois Computes Research Notebook. Campus login via CILogon."],
+ ["IDDS","The NCSA allocations database. Source of UIDs and GIDs."],
+ ["jobd","Ingests completed-job records back into the allocations database."],
+ ["Kerberos","NCSA's authentication service. Holds your password."],
+ ["LDAP","NCSA's directory — what every service reads at login."],
+ ["NAIRR","National AI Research Resource. Allocates on Delta and DeltaAI."],
+ ["NAPS","Internal interface over the allocations database."],
+ ["OU","A branch of the directory. NCSA has a main one plus one per resource."],
+ ["QoS","A Slurm setting attached to each project account."],
+ ["Savannah","Internal platform running the LDAP sync, the AD sync and billing."],
+ ["Slurm","The batch scheduler. Enforces budgets, records usage."],
+ ["SU","Service unit — what a compute allocation is awarded in."],
+ ["SUP","The NCSA support queue in Jira."],
+ ["UID","The number a Unix system uses for you. Generated by IDDS."],
+ ["XRAS","The allocation request and review application."]
+];
+
+/* ---------- helpers ---------- */
+const E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const MODE={auto:"Auto",manual:"Manual",none:"None"};
+let uid=0;
+function rows(items){
+  return items.map(it=>{
+    const id="d"+(++uid);
+    return '<div class="row"><button type="button" aria-expanded="false" aria-controls="'+id+'">'+
+      '<span><span class="ttl">'+E(it.t)+'</span><span class="one">'+E(it.one)+'</span></span>'+
+      '<span>'+(it.badge?'<span class="badge b-'+it.badge+'">'+MODE[it.badge]+'</span> ':'')+
+      '<span class="chev" aria-hidden="true">&#9656;</span></span></button>'+
+      '<div class="panel" id="'+id+'" hidden><p>'+E(it.more)+'</p>'+
+      (it.meta?'<div class="meta">'+E(it.meta)+'</div>':'')+'</div></div>';
+  }).join('');
 }
-];
-
-const CREDS = [
- ["NCSA identity","NCSA","NCSA Duo","Delta, DeltaAI, Radiant, Nightingale, Hydro, Granite, Taiga — anything in the NCSA identity domain"],
- ["UIUC NetID","University of Illinois System","Illinois Duo","Illinois Campus Cluster, ICRN, campus services. A separate Duo enrolment from the NCSA one."],
- ["Campus Active Directory account","University of Illinois","Illinois Duo","Campus services, and — via groups synced into NCSA LDAP — some NCSA research storage"],
- ["ACCESS ID","The national ACCESS programme","ACCESS","The ACCESS portal and allocation requests. Not an NCSA login on its own."],
- ["Google Apps @ Illinois","University of Illinois","Illinois Duo","Some request forms, including Illinois HTC intake"],
- ["Globus identity","Globus","varies","Data transfer. Globus links campus, NCSA and ACCESS identities internally — a link NCSA's own systems cannot read."]
-];
-
-const GLOSSARY = [
- ["ACCESS","The national programme that allocates time on US research computing resources, successor to XSEDE. NCSA is one of its resource providers."],
- ["ACHE","Advanced Computing Health Enclave. The regulated environment around the Nightingale cluster."],
- ["acctd","The mechanism that turns an award recorded in the allocations database into real accounts, groups and budgets on a resource."],
- ["AMIE","The message channel that carries allocation packets from ACCESS to a resource provider."],
- ["CDB","Central database. XSEDE-era term still used for the central allocations record on the ACCESS side."],
- ["Charge group","An LDAP group, one per project allocation, maintained only by acctd. Membership is what grants access."],
- ["CILogon","A federated login broker. Also, confusingly, the name of a certificate service and of COmanage, an identity registry."],
- ["CiDeR","The registry where a resource is described so that national systems know it exists."],
- ["COmanage","The part of CILogon that models one person holding several institutional identities."],
- ["Duo","Two-factor authentication. NCSA Duo and Illinois Duo are separate enrolments."],
- ["GID","Group identifier. The numeric id a Unix system uses for a group. Generated by the allocations database."],
- ["GrpTRESMins","The Slurm setting that holds a project's remaining budget."],
- ["HTC","High-throughput computing. Illinois HTC is a separate, unfunded beta service running HTCondor rather than Slurm."],
- ["ICCP","Illinois Campus Cluster Program. Campus identity domain, not on NCSA's provisioning machinery."],
- ["ICRN","Illinois Computes Research Notebook. Reached through a campus login brokered by CILogon."],
- ["IDDS","The NCSA allocations database. The record of what was awarded, and the source of UIDs and GIDs."],
- ["jobd","The service that ingests completed-job records back into the allocations database."],
- ["Kerberos","The NCSA authentication service. Holds the password."],
- ["LDAP","The directory protocol, and by extension NCSA's directory — the thing every service reads at login."],
- ["NAIRR","National AI Research Resource. A programme that allocates on NCSA systems, principally Delta and DeltaAI."],
- ["NAPS","An internal reporting and management interface over the allocations database."],
- ["OU","Organisational unit. A branch of the directory. NCSA LDAP has a main branch plus one per integrated resource."],
- ["QoS","Quality of service. A Slurm setting attached to each project account."],
- ["Savannah","An internal NCSA application platform. Runs the LDAP identity sync, the campus AD sync, the Covered Entity Manager and the billing tool."],
- ["Slurm","The batch scheduler on the compute systems. Enforces the budget and is the authority on usage."],
- ["SU","Service unit. The unit a compute allocation is awarded in."],
- ["SUP","The project key of the NCSA support queue in Jira."],
- ["UID","User identifier. The numeric id a Unix system uses for a person. Generated by the allocations database."],
- ["XRAS","The allocation request and review application. NCSA builds it for ACCESS and runs its own instance."]
-];
-
-const STAGE_NAMES = {0:"Identity",1:"Request & approval",2:"Allocation of record",
-  3:"Provisioning",4:"Entitlement",5:"Enforcement",6:"Usage & money"};
-const MODE_LABEL = {auto:"Automated",manual:"Manual",none:"Absent",note:"Note"};
-
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const badge = (txt,kind) => '<span class="badge b-'+kind+'">'+esc(txt)+'</span>';
-
-/* ---------- tabs ---------- */
-const tabs = [...document.querySelectorAll('nav.tabs button')];
-function showTab(id){
-  tabs.forEach(t=>{
-    const on = t.getAttribute('aria-controls')===id;
-    t.setAttribute('aria-selected', on?'true':'false');
-    document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
-  });
-  if(location.hash.slice(1)!==id) history.replaceState(null,'','#'+id);
-  window.scrollTo({top:0,behavior:'instant'});
-}
-tabs.forEach(t=>t.addEventListener('click',()=>showTab(t.getAttribute('aria-controls'))));
 document.addEventListener('click',e=>{
-  const a = e.target.closest('[data-goto]');
-  if(a){ e.preventDefault(); showTab(a.dataset.goto); }
+  const b=e.target.closest('.row > button');
+  if(b){const p=document.getElementById(b.getAttribute('aria-controls'));
+    const open=b.getAttribute('aria-expanded')==='true';
+    b.setAttribute('aria-expanded',String(!open)); p.hidden=open; return;}
+  const q=e.target.closest('[data-goto]');
+  if(q){show(q.dataset.goto); if(q.dataset.sys) drawSys(q.dataset.sys);}
+});
+
+/* ---------- tabs, with arrow keys ---------- */
+const tabs=[...document.querySelectorAll('nav button')];
+function show(id){
+  tabs.forEach(t=>{const on=t.getAttribute('aria-controls')===id;
+    t.setAttribute('aria-selected',String(on)); t.tabIndex=on?0:-1;
+    document.getElementById(t.getAttribute('aria-controls')).hidden=!on;});
+  history.replaceState(null,'','#'+id);
+  window.scrollTo(0,0);
+}
+tabs.forEach((t,i)=>{
+  t.addEventListener('click',()=>show(t.getAttribute('aria-controls')));
+  t.addEventListener('keydown',ev=>{
+    const k=ev.key; let n=null;
+    if(k==='ArrowRight')n=(i+1)%tabs.length;
+    else if(k==='ArrowLeft')n=(i-1+tabs.length)%tabs.length;
+    else if(k==='Home')n=0; else if(k==='End')n=tabs.length-1;
+    if(n!==null){ev.preventDefault();tabs[n].focus();show(tabs[n].getAttribute('aria-controls'));}
+  });
 });
 
 /* ---------- theme ---------- */
-const root = document.documentElement;
-document.getElementById('themebtn').addEventListener('click',()=>{
-  const cur = root.getAttribute('data-theme');
-  const dark = cur ? cur==='dark'
-    : window.matchMedia('(prefers-color-scheme: dark)').matches;
-  root.setAttribute('data-theme', dark?'light':'dark');
-  try{ localStorage.setItem('ncsa-access-theme', dark?'light':'dark'); }catch(_){}
+const root=document.documentElement;
+document.getElementById('theme').addEventListener('click',()=>{
+  const cur=root.getAttribute('data-theme');
+  const dark=cur?cur==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  root.setAttribute('data-theme',dark?'light':'dark');
+  try{localStorage.setItem('ncsa-theme',dark?'light':'dark')}catch(_){}
 });
-try{ const t=localStorage.getItem('ncsa-access-theme'); if(t) root.setAttribute('data-theme',t); }catch(_){}
+try{const v=localStorage.getItem('ncsa-theme'); if(v)root.setAttribute('data-theme',v)}catch(_){}
+
+/* ---------- start ---------- */
+document.getElementById('keyfacts').innerHTML=
+  rows(KEYFACTS.map(f=>({t:f[0],one:f[1],more:f[2]})));
 
 /* ---------- systems ---------- */
-const picker = document.getElementById('syspicker');
-picker.innerHTML = SYSTEMS.map(s =>
-  '<button type="button" data-sys="'+s.id+'" aria-pressed="false">'+esc(s.label)+'</button>').join('');
-
-function renderSystem(id){
-  const s = SYSTEMS.find(x=>x.id===id) || SYSTEMS[0];
-  [...picker.querySelectorAll('button')].forEach(b=>
-    b.setAttribute('aria-pressed', b.dataset.sys===s.id ? 'true':'false'));
-
-  document.getElementById('sysmeta').innerHTML =
-    '<div class="fact" style="grid-column:1/-1;background:var(--panel2)">'+
-    '<dt>'+esc(s.title)+'</dt><dd style="color:var(--ink2)">'+esc(s.blurb)+'</dd></div>'+
-    s.facts.map(f=>'<div class="fact"><dt>'+esc(f[0])+'</dt><dd>'+esc(f[1])+'</dd></div>').join('');
-
-  document.getElementById('sysflow').innerHTML = s.steps.map((st,i)=>
-    (i? '<div class="connector"></div>':'') +
-    '<div class="step is-'+st.mode+'">'+
-      '<div class="idx">'+(i+1)+'</div>'+
-      '<div>'+
-        '<span class="steplabel">'+esc(STAGE_NAMES[st.stage])+' &middot; '+esc(st.comp)+'</span>'+
-        '<h4>'+esc(st.h)+'</h4>'+
-        '<p>'+esc(st.p)+'</p>'+
-        (st.flag? '<span class="flag">&#9656; '+esc(st.flag)+'</span>':'')+
-      '</div>'+
-      '<div>'+badge(MODE_LABEL[st.mode], st.mode)+'</div>'+
-    '</div>').join('');
-
-  document.getElementById('sysnotes').innerHTML = s.notes && s.notes.length
-    ? '<h2>Worth knowing</h2><div class="grid g2">'+ s.notes.map(n=>
-        '<div class="card">'+badge(MODE_LABEL[n.k]||'Note', n.k)+
-        '<h3 style="margin:8px 0 4px">'+esc(n.t)+'</h3>'+
-        '<p style="font-size:.9rem;color:var(--ink2);max-width:none">'+esc(n.d)+'</p></div>').join('')+'</div>'
-    : '';
+const pick=document.getElementById('syspick');
+pick.innerHTML=SYS.map(s=>'<button type="button" data-sys="'+s.id+'" aria-pressed="false">'+E(s.label)+'</button>').join('');
+let curSys=SYS[0].id;
+function drawSys(id){
+  const s=SYS.find(x=>x.id===id)||SYS[0]; curSys=s.id;
+  [...pick.children].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sys===s.id)));
+  document.getElementById('sysfacts').innerHTML=
+    s.facts.map(f=>'<span>'+E(f[0])+' <b>'+E(f[1])+'</b></span>').join('');
+  const only=document.getElementById('onlyman').checked;
+  const steps=s.steps.filter(st=>!only||st[2]!=='auto');
+  document.getElementById('sysflow').innerHTML= steps.length
+    ? rows(steps.map(st=>({t:st[3],one:STAGE[st[0]]+' · '+st[1],badge:st[2],more:st[4]})))
+    : '<div class="row"><button type="button" aria-expanded="false" aria-controls="none0"><span><span class="ttl">No manual steps</span><span class="one">This path runs without a person.</span></span><span class="chev" aria-hidden="true">&#9656;</span></button><div class="panel" id="none0" hidden><p>Every step on this path is automated.</p></div></div>';
+  const n=s.note;
+  document.getElementById('sysnote').innerHTML='<h2>Worth knowing</h2>'+
+    rows([{t:n[1],one:'',badge:n[0],more:n[2]}]);
 }
-picker.addEventListener('click',e=>{
-  const b=e.target.closest('button[data-sys]'); if(b) renderSystem(b.dataset.sys);
-});
-renderSystem(SYSTEMS[0].id);
+pick.addEventListener('click',e=>{const b=e.target.closest('button[data-sys]'); if(b)drawSys(b.dataset.sys);});
+document.getElementById('onlyman').addEventListener('change',()=>drawSys(curSys));
+drawSys(curSys);
 
-/* ---------- components ---------- */
-const stageOrder = [1,2,3,4,5,0,6];
-const filterbar = document.getElementById('compfilter');
-filterbar.innerHTML = '<span class="muted" style="margin-right:4px">Filter by stage:</span>'+
-  '<button type="button" class="fbtn" data-stage="all" aria-pressed="true">All</button>'+
-  stageOrder.map(n=>'<button type="button" class="fbtn" data-stage="'+n+'" aria-pressed="false">'+
-    esc(STAGE_NAMES[n])+'</button>').join('');
-[...filterbar.querySelectorAll('.fbtn')].forEach(b=>{
-  b.style.cssText='background:var(--panel);border:1px solid var(--line2);color:var(--ink2);'+
-    'border-radius:999px;padding:4px 12px;font:inherit;font-size:.82rem;cursor:pointer';
-});
-
-function renderComponents(stage){
-  const list = stage==='all' ? COMPONENTS : COMPONENTS.filter(c=>String(c.stage)===String(stage));
-  document.getElementById('complist').innerHTML = list.map(c=>
-    '<article class="comp">'+
-      '<h3>'+esc(c.name)+'</h3>'+
-      '<span class="full">'+esc(c.full)+' &middot; '+esc(STAGE_NAMES[c.stage])+'</span>'+
-      '<p class="job">'+esc(c.job)+'</p>'+
-      '<p class="not"><strong>What it is not:</strong> '+esc(c.not)+'</p>'+
-      (c.tags.length? '<div class="tags">'+c.tags.map(t=>badge(t[0],t[1])).join('')+'</div>':'')+
-      '<div class="meta">'+esc(c.meta)+'</div>'+
-    '</article>').join('');
-  [...filterbar.querySelectorAll('.fbtn')].forEach(b=>{
-    const on = b.dataset.stage===String(stage);
-    b.setAttribute('aria-pressed', on?'true':'false');
-    b.style.background = on? 'var(--accent)':'var(--panel)';
-    b.style.color = on? '#fff':'var(--ink2)';
-    b.style.borderColor = on? 'var(--accent)':'var(--line2)';
-  });
+/* ---------- pieces, searchable ---------- */
+const plist=document.getElementById('plist'), pcount=document.getElementById('pcount');
+function drawPieces(q){
+  q=(q||'').trim().toLowerCase();
+  const hits=PIECES.filter(p=>!q||(p[0]+' '+p[2]+' '+p[3]+' '+STAGE[p[1]]).toLowerCase().includes(q));
+  plist.innerHTML=hits.length
+    ? rows(hits.map(p=>({t:p[0],one:p[2],more:'Not: '+p[3],meta:STAGE[p[1]]+' · '+p[4]})))
+    : '<div class="row"><button type="button" aria-expanded="false" aria-controls="nores"><span><span class="ttl">Nothing matches</span><span class="one">Try a different word.</span></span></button><div class="panel" id="nores" hidden><p>Try the glossary instead.</p></div></div>';
+  pcount.textContent=hits.length+' of '+PIECES.length+' shown';
 }
-filterbar.addEventListener('click',e=>{
-  const b=e.target.closest('.fbtn'); if(b) renderComponents(b.dataset.stage);
-});
-renderComponents('all');
+document.getElementById('psearch').addEventListener('input',e=>drawPieces(e.target.value));
+drawPieces('');
 
-/* ---------- logins + glossary ---------- */
-document.getElementById('credtable').innerHTML = CREDS.map(r=>
-  '<tr><td><strong>'+esc(r[0])+'</strong></td><td>'+esc(r[1])+'</td><td>'+esc(r[2])+
-  '</td><td>'+esc(r[3])+'</td></tr>').join('');
+/* ---------- logins ---------- */
+document.getElementById('credt').innerHTML=CREDS.map(c=>
+  '<tr><td><strong>'+E(c[0])+'</strong></td><td>'+E(c[1])+'</td><td>'+E(c[2])+'</td></tr>').join('');
+document.getElementById('idrows').innerHTML=
+  rows(IDNOTES.map(n=>({t:n[0],one:n[1],more:n[2]})));
 
-document.getElementById('glosslist').innerHTML = GLOSSARY
-  .slice().sort((a,b)=>a[0].toLowerCase().localeCompare(b[0].toLowerCase()))
-  .map(g=>'<div><dt>'+esc(g[0])+'</dt><dd>'+esc(g[1])+'</dd></div>').join('');
+/* ---------- glossary, searchable ---------- */
+const glist=document.getElementById('glist');
+function drawGloss(q){
+  q=(q||'').trim().toLowerCase();
+  const hits=GLOSS.filter(g=>!q||(g[0]+' '+g[1]).toLowerCase().includes(q))
+    .sort((a,b)=>a[0].toLowerCase().localeCompare(b[0].toLowerCase()));
+  glist.innerHTML=hits.length?hits.map(g=>
+    '<tr><td style="width:150px"><strong>'+E(g[0])+'</strong></td><td>'+E(g[1])+'</td></tr>').join('')
+    :'<tr><td colspan="2">Nothing matches.</td></tr>';
+}
+document.getElementById('gsearch').addEventListener('input',e=>drawGloss(e.target.value));
+drawGloss('');
 
 /* ---------- deep link ---------- */
-const h = location.hash.slice(1);
-if(h && document.getElementById(h) && document.getElementById(h).getAttribute('role')==='tabpanel') showTab(h);
+const h=location.hash.slice(1);
+if(h&&document.getElementById(h)&&document.getElementById(h).getAttribute('role')==='tabpanel')show(h);
 </script>
 </body>
 </html>
